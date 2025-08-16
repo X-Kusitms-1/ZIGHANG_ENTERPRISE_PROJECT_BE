@@ -1,4 +1,4 @@
-name: Staging Deployment Workflow
+name: Production Deployment Workflow
 
 on:
   pull_request:
@@ -74,6 +74,6 @@ jobs:
           cd manifest
           git config --local user.email "kjeng7897@gmail.com"
           git config --local user.name "SeongHo5356"
-          git add staging/deployment.yml
+          git add production/deployment.yml
           git commit -m "Update image tag to $IMAGE_TAG" || exit 0
           git push
