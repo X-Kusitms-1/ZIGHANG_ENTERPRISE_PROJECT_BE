@@ -2,7 +2,7 @@ name: Staging Deployment Workflow
 
 on:
   pull_request:
-    branches: [ "develop", "main" ]
+    branches: [ "develop" ]
 
 jobs:
   build-and-push:
