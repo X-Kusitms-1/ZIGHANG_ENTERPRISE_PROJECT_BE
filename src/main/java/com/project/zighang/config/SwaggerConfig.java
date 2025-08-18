@@ -9,7 +9,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import java.util.Arrays;
+import java.util.List;
 
 @Configuration
 public class SwaggerConfig {
@@ -37,6 +37,6 @@ public class SwaggerConfig {
         return new OpenAPI()
                 .components(new Components())
                 .info(info)
-                .servers(Arrays.asList(localServer, stgServer, prdServer));
+                .servers(List.of(localServer, stgServer, prdServer));
     }
 }
