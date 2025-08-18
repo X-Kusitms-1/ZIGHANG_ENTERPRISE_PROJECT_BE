@@ -32,7 +32,7 @@ jobs:
       - name: Build with Gradle Wrapper
         env:
           SPRING_PROFILES_ACTIVE: stage
-        run: ./gradlew clean build -x test --info --stacktrace --no-daemon
+        run: ./gradlew clean build --info --stacktrace --no-daemon
 
       - name: Docker login
         uses: docker/login-action@v2
