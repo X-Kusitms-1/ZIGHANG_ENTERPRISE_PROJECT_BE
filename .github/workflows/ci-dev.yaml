@@ -30,8 +30,6 @@ jobs:
         run: echo "${{ secrets.APPLICATION_STAGE_PROPERTIES }}" > ./src/main/resources/application-stage.properties
 
       - name: Build with Gradle Wrapper
-        env:
-          SPRING_PROFILES_ACTIVE: stage
         run: ./gradlew clean build --info --stacktrace --no-daemon
 
       - name: Docker login
