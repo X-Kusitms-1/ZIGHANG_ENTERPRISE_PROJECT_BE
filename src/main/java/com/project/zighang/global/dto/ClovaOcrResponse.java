@@ -1,4 +1,4 @@
-package com.project.zighang.global.adapter.webapi.dto;
+package com.project.zighang.global.dto;
 
 import java.util.List;
 

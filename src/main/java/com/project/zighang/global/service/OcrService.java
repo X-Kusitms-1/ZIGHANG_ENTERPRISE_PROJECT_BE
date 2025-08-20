@@ -1,8 +1,7 @@
-package com.project.zighang.global.presentation;
+package com.project.zighang.global.service;
 
-import com.project.zighang.global.adapter.webapi.dto.ClovaOcrRequest;
-import com.project.zighang.global.adapter.webapi.dto.ClovaOcrResponse;
-import com.project.zighang.global.presentation.required.OcrReader;
+import com.project.zighang.global.dto.ClovaOcrRequest;
+import com.project.zighang.global.dto.ClovaOcrResponse;
 import com.project.zighang.global.util.ClovaOcrClient;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -16,23 +15,20 @@ public class OcrService implements OcrReader {
     private final ClovaOcrClient clovaOcrClient;
 
     @Override
-    public ClovaOcrResponse extractFromUrl(String imageUrl, String language, String version) {
-        String ver = (version == null || version.isBlank()) ? "V1" : version;
-        String lang = (language == null || language.isBlank()) ? "ko" : language;
-
-        ClovaOcrRequest req = ClovaOcrRequest.create(ver, lang, null, imageUrl);
+    public ClovaOcrResponse extractFromUrl(String imageUrl) {
+        ClovaOcrRequest req = ClovaOcrRequest.create("V1", "ko", null, imageUrl);
         return clovaOcrClient.extractTextByUrl(req);
     }
 
     @Override
-    public String extractTxtFromUrl(String imageUrl, String lang, String version){
-        ClovaOcrResponse ocrResponse = extractFromUrl(imageUrl, lang, version);
+    public String extractTxtFromUrl(String imageUrl){
+        ClovaOcrResponse ocrResponse = extractFromUrl(imageUrl);
         return extractTextWithFilter(ocrResponse, img -> true);
     }
 
     @Override
-    public String extractSuccessTxtFromUrl(String imageUrl, String lang, String version){
-        ClovaOcrResponse ocrResponse = extractFromUrl(imageUrl, lang, version);
+    public String extractSuccessTxtFromUrl(String imageUrl){
+        ClovaOcrResponse ocrResponse = extractFromUrl(imageUrl);
         return extractTextWithFilter(ocrResponse, img -> "SUCCESS".equalsIgnoreCase(img.inferResult()));
     }
 

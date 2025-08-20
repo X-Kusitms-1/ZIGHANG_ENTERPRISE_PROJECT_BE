@@ -1,4 +1,4 @@
-package com.project.zighang.global.adapter.webapi.dto;
+package com.project.zighang.global.dto;
 
 import java.util.List;
 import java.util.UUID;
@@ -8,22 +8,20 @@ public record ClovaOcrRequest(
         String requestId,
         long timestamp,
         String lang,
-        String resultType,
         List<Image> images
 ) {
-    public static ClovaOcrRequest create(String version, String lang, String resultType, List<Image> images) {
+    public static ClovaOcrRequest create(String version, String lang, List<Image> images) {
         return new ClovaOcrRequest(
                 version,
                 UUID.randomUUID().toString(),
                 System.currentTimeMillis(),
                 lang,
-                resultType,
                 images
         );
     }
 
     public static ClovaOcrRequest create(String version, String lang, String resultType, String imageUrl) {
-        return create(version, lang, resultType, List.of(Image.create("png", "input", imageUrl)));
+        return create(version, lang, List.of(Image.create("png", "input", imageUrl)));
     }
 
     public record Image(
