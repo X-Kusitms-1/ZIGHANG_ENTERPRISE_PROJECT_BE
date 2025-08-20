@@ -7,7 +7,7 @@ import org.springframework.http.HttpStatus;
 
 @Getter
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
-public enum Error {
+public enum Error implements ApiResponseCode {
 
     /**
      * 400 BAD REQUEST EXCEPTION
@@ -21,8 +21,4 @@ public enum Error {
 
     private final HttpStatus httpStatus;
     private final String message;
-
-    public int getErrorCode() {
-        return httpStatus.value();
-    }
 }
