@@ -27,7 +27,7 @@ jobs:
         run: chmod +x gradlew
 
       - name: Create application-stage.properties
-        run: echo "${{ secrets.APPLICATION_STAGE_PROPERTIES }}" > ./src/main/resources/application-stage.properties
+        run: echo "${{ secrets.APPLICATION_STAGE_PROPERTIES }}" > ./src/main/resources/application.properties
 
       - name: Build with Gradle Wrapper
         run: ./gradlew clean build --info --stacktrace --no-daemon
