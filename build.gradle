@@ -47,7 +47,12 @@ dependencies {
 
 	implementation 'org.springframework.boot:spring-boot-starter-webflux'
 
+	//Open Feign
 	implementation 'org.springframework.cloud:spring-cloud-starter-openfeign'
+
+	//Emailclient
+	implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
+	implementation 'org.springframework.boot:spring-boot-starter-mail'
 }
 
 tasks.named('test') {

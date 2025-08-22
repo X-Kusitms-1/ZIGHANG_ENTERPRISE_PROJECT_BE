@@ -11,7 +11,7 @@ import java.util.function.Predicate;
 
 @Service
 @RequiredArgsConstructor
-public class OcrService implements OcrReader {
+public class ClovaOcrReader implements OcrReader {
     private final ClovaOcrClient clovaOcrClient;
 
     @Override
