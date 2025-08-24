@@ -53,6 +53,10 @@ dependencies {
 	//Emailclient
 	implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
 	implementation 'org.springframework.boot:spring-boot-starter-mail'
+
+	//s3
+	implementation 'com.amazonaws:aws-java-sdk-s3:1.12.782'
+
 }
 
 tasks.named('test') {
