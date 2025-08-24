@@ -28,7 +28,6 @@ public class UserOnboardingEntity {
     @Enumerated(EnumType.STRING)
     private Industry industry;
 
-    @Setter
     private Long dailyRecommendPostCount;
 
     public static UserOnboardingEntity create(UserEntity userEntity, Long career, String address, Industry industry) {
@@ -45,5 +44,9 @@ public class UserOnboardingEntity {
         this.career = career;
         this.address = address;
         this.industry = industry;
+    }
+
+    public void updateDailyRecommendPostCount(Long dailyRecommendPostCount){
+        this.dailyRecommendPostCount = dailyRecommendPostCount;
     }
 }
