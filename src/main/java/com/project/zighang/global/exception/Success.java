@@ -12,7 +12,13 @@ public enum Success implements ApiResponseCode {
     /**
      * 200 OK
      */
-    GET_API_REQUEST_SUCCESS(HttpStatus.OK, "Get API 호출에 성공했습니다.");
+    GET_API_REQUEST_SUCCESS(HttpStatus.OK, "Get API 호출에 성공했습니다."),
+
+
+    /**
+     * 201 CREATED
+     */
+    POST_USER_Onboarding_API_REQUEST_SUCCESS(HttpStatus.CREATED, "유저 오보딩 POST API 호출에 성공했습니다.");
 
     private final HttpStatus httpStatus;
     private final String message;
