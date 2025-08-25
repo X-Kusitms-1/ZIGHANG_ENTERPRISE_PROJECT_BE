@@ -9,6 +9,6 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class AuthService {
 
-    private final KakaoSignInService kakaoSignInService;
+    private final KakaoLoginService kakaoLoginService;
 
 }
