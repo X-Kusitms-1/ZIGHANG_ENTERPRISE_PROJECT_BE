@@ -1,5 +1,6 @@
 package com.project.zighang.user.entity;
 
+import com.project.zighang.global.common.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -10,12 +11,7 @@ import lombok.*;
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @EqualsAndHashCode(callSuper = false, onlyExplicitlyIncluded = true)
 @Table(name = "user_onboarding_entity")
-public class UserOnboardingEntity {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @EqualsAndHashCode.Include
-    private Long id;
+public class UserOnboardingEntity extends BaseEntity {
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_entity_id")
