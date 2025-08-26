@@ -17,7 +17,7 @@ public enum Error implements ApiResponseCode {
     /**
      * 404 NOT FOUND
      */
-    NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 정보 입니다.");
+    NOT_FOUND_USER(HttpStatus.NOT_FOUND, "존재하지 않는 사용자 정보입니다.");
 
     private final HttpStatus httpStatus;
     private final String message;
