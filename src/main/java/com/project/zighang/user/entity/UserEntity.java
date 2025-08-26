@@ -22,9 +22,9 @@ public class UserEntity extends BaseEntity {
     private String provider;
 
     // 소셜 로그인으로부터 얻은 사용자 고유 ID
-    private String socialId;
+    private Long socialId;
 
-    public static UserEntity create(String email, String name, String provider, String socialId) {
+    public static UserEntity create(String email, String name, String provider, Long socialId) {
         return UserEntity.builder()
                 .email(email)
                 .name(name)

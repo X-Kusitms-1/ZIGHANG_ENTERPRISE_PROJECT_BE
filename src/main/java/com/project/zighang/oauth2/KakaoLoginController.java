@@ -1,5 +1,7 @@
 package com.project.zighang.oauth2;
 
+import com.project.zighang.oauth2.dto.LoginResult;
+import com.project.zighang.oauth2.dto.TokenResult;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -15,9 +17,9 @@ public class KakaoLoginController {
     private final KakaoLoginService kakaoLoginService;
 
     @GetMapping
-    public ResponseEntity<String> kakaoLogin(
+    public ResponseEntity<TokenResult> kakaoLogin(
             @RequestParam("code") String code) {
-        String result = kakaoLoginService.login(code);
+        TokenResult result = kakaoLoginService.login(code);
         return ResponseEntity.ok(result);
     }
 }
