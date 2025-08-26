@@ -1,7 +1,7 @@
-package com.project.zighang.oauth2;
+package com.project.zighang.oauth2.controller;
 
-import com.project.zighang.oauth2.dto.LoginResult;
 import com.project.zighang.oauth2.dto.TokenResult;
+import com.project.zighang.oauth2.service.KakaoLoginService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;

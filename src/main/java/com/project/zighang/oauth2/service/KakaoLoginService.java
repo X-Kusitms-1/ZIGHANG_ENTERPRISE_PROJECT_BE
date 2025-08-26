@@ -1,7 +1,7 @@
-package com.project.zighang.oauth2;
+package com.project.zighang.oauth2.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.project.zighang.oauth2.dto.*;
+import com.project.zighang.oauth2.repository.TokenRepository;
 import com.project.zighang.user.entity.UserEntity;
 import com.project.zighang.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -21,6 +21,7 @@ public class KakaoLoginService {
 
     private final WebClient.Builder webClientBuilder;
     private final UserRepository userRepository;
+    private final TokenRepository tokenRepository;
     private final TokenProvider tokenProvider;
 
     @Value("${kakao.client-id}")
@@ -40,6 +41,7 @@ public class KakaoLoginService {
         KakaoUserInfoResponseDto userInfo = getUserInfoByCode(code);
         LoginResult result = loginOrSignUp(userInfo);
         TokenDto tokenDto = tokenProvider.createToken(result.user());
+        saveTokenEntity(tokenDto, result.user());
         return TokenResult.from(tokenDto, result.isNewUser());
     }
 
@@ -78,24 +80,39 @@ public class KakaoLoginService {
     @Transactional
     protected LoginResult loginOrSignUp(KakaoUserInfoResponseDto userInfo) {
         Long kakaoId = userInfo.getId();
-        String email = userInfo.getKakaoAccount().getEmail();
-        String name = userInfo.getKakaoAccount().getProfile().getNickname();
+        String email = null;
+        String name = null;
 
-        Optional<UserEntity> user = getUserByKaKaoId(kakaoId);
-        if (user.isEmpty()) {
-            user = Optional.of(
-                    userRepository.save(
-                            UserEntity.create(email, name, "kakao", kakaoId)
-                    )
-            );
-            return new LoginResult(user.get(), true);
+        if (userInfo.getKakaoAccount() != null) {
+            email = userInfo.getKakaoAccount().getEmail();
+            if (userInfo.getKakaoAccount().getProfile() != null) {
+                name = userInfo.getKakaoAccount().getProfile().getNickname();
+            }
         }
 
-        return new LoginResult(user.get(), false);
+        if (name == null || name.isEmpty()) {
+            name = "카카오 사용자";
+        }
+
+        Optional<UserEntity> userOptional = userRepository.findBySocialId(kakaoId);
+        if (userOptional.isEmpty()) {
+            UserEntity newUser = userRepository.save(
+                    UserEntity.create(email, name, "kakao", kakaoId)
+            );
+            return new LoginResult(newUser, true);
+        } else {
+            return new LoginResult(userOptional.get(), false);
+        }
     }
 
     @Transactional(readOnly = true)
     protected Optional<UserEntity> getUserByKaKaoId(Long kakaoId) {
         return userRepository.findBySocialId(kakaoId);
+    }
+
+    @Transactional
+    protected void saveTokenEntity(TokenDto tokenDto, UserEntity userEntity) {
+        TokenEntity tokenEntity = TokenEntity.create(tokenDto.accessToken(), tokenDto.refreshToken(), userEntity);
+        tokenRepository.save(tokenEntity);
     }
 }
