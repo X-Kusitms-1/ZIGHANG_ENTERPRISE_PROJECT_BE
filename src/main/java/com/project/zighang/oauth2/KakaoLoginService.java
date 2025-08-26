@@ -2,6 +2,8 @@ package com.project.zighang.oauth2;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.project.zighang.oauth2.dto.KakaoTokenResponseDto;
+import com.project.zighang.oauth2.dto.KakaoUserInfoResponseDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.beans.factory.annotation.Value;
@@ -30,12 +32,10 @@ public class KakaoLoginService {
     private String userInfoUri;
 
     public String login(String code) {
-        // 1. 인가 코드로 액세스 토큰 요청
         KakaoTokenResponseDto tokenResponse = getToken(code);
         System.out.println("--- Kakao User Token ---");
         System.out.println(tokenResponse.getAccess_token());
 
-        // 2. 액세스 토큰으로 사용자 정보 요청
         KakaoUserInfoResponseDto userInfo = getUserInfo(tokenResponse.getAccess_token());
 
         try {
@@ -47,7 +47,7 @@ public class KakaoLoginService {
             System.err.println("JSON 파싱 에러: " + e.getMessage());
         }
 
-        // 3. 사용자 정보를 기반으로 우리 서비스의 회원인지 확인
+        // 카카오 사용자 정보를 기반으로 우리 서비스의 회원인지 확인
         Long kakaoId = userInfo.getId();
         String nickname = "default_nickname";
 

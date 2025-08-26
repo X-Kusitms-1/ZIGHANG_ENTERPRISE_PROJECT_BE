@@ -1,4 +1,4 @@
-package com.project.zighang.oauth2;
+package com.project.zighang.oauth2.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
