@@ -21,7 +21,7 @@ public class UserEntity extends BaseEntity {
     private String provider;
 
     // 소셜 로그인으로부터 얻은 사용자 고유 ID
-    @Column(unique = true)
+    @Column(name = "social_id", unique = true, nullable = false)
     private Long socialId;
 
     public static UserEntity create(String email, String name, String provider, Long socialId) {

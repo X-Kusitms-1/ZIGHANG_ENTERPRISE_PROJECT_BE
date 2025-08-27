@@ -24,6 +24,8 @@ public class KakaoLoginService {
     private final TokenRepository tokenRepository;
     private final TokenProvider tokenProvider;
 
+    private final UserAuthService userAuthService;
+
     @Value("${kakao.client-id}")
     private String clientId;
 
@@ -39,9 +41,16 @@ public class KakaoLoginService {
     @Transactional
     public TokenResult login(String code) {
         KakaoUserInfoResponseDto userInfo = getUserInfoByCode(code);
-        LoginResult result = loginOrSignUp(userInfo);
+        LoginResult result = userAuthService.loginOrSignUp(userInfo);
+
+        Optional<TokenEntity> existing = tokenRepository.findByUserEntity(result.user());
+        if (existing.isPresent() && tokenProvider.validateToken(existing.get().getAccessToken())) {
+            TokenDto tokenDto = TokenDto.of(existing.get().getAccessToken(), existing.get().getRefreshToken());
+            return TokenResult.from(tokenDto, result.isNewUser());
+        }
+
         TokenDto tokenDto = tokenProvider.createToken(result.user());
-        saveTokenEntity(tokenDto, result.user());
+        userAuthService.upsertTokenEntity(tokenDto, result.user());
         return TokenResult.from(tokenDto, result.isNewUser());
     }
 
@@ -75,44 +84,5 @@ public class KakaoLoginService {
                 .retrieve()
                 .bodyToMono(KakaoUserInfoResponseDto.class)
                 .block();
-    }
-
-    @Transactional
-    protected LoginResult loginOrSignUp(KakaoUserInfoResponseDto userInfo) {
-        Long kakaoId = userInfo.getId();
-        String email = null;
-        String name = null;
-
-        if (userInfo.getKakaoAccount() != null) {
-            email = userInfo.getKakaoAccount().getEmail();
-            if (userInfo.getKakaoAccount().getProfile() != null) {
-                name = userInfo.getKakaoAccount().getProfile().getNickname();
-            }
-        }
-
-        if (name == null || name.isEmpty()) {
-            name = "카카오 사용자";
-        }
-
-        Optional<UserEntity> userOptional = userRepository.findBySocialId(kakaoId);
-        if (userOptional.isEmpty()) {
-            UserEntity newUser = userRepository.save(
-                    UserEntity.create(email, name, "kakao", kakaoId)
-            );
-            return new LoginResult(newUser, true);
-        } else {
-            return new LoginResult(userOptional.get(), false);
-        }
-    }
-
-    @Transactional(readOnly = true)
-    protected Optional<UserEntity> getUserByKaKaoId(Long kakaoId) {
-        return userRepository.findBySocialId(kakaoId);
-    }
-
-    @Transactional
-    protected void saveTokenEntity(TokenDto tokenDto, UserEntity userEntity) {
-        TokenEntity tokenEntity = TokenEntity.create(tokenDto.accessToken(), tokenDto.refreshToken(), userEntity);
-        tokenRepository.save(tokenEntity);
     }
 }

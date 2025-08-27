@@ -42,10 +42,12 @@ public class TokenProvider {
 
         String accessToken = Jwts.builder()
                 .setSubject(user.getId().toString())
+                .setIssuedAt(new Date(nowTime))
                 .setExpiration(tokenExpiredTime)
                 .signWith(key, SignatureAlgorithm.HS256)
                 .compact();
 
+        // refreshToken에 대한 로직은 미구현 계획입니다.
         String refreshToken = Jwts.builder()
                 .setExpiration(refreshExpiredTime)
                 .signWith(key, SignatureAlgorithm.HS256)
