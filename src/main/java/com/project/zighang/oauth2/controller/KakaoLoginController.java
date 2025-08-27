@@ -19,7 +19,12 @@ public class KakaoLoginController {
     private final KakaoLoginService kakaoLoginService;
 
     @GetMapping
-    @Operation(summary = "Kakao OAuth2 login", description = "Exchanges authorization code for JWT pair; requires matching state to mitigate CSRF")
+    @Operation(
+            summary = "카카오 소셜 로그인",
+            description = """
+    카카오 인가 코드로 소셜 로그인을 진행하며, 신규 유저일 경우 자동 가입됩니다. 성공 시 서비스 자체 JWT(Access/Refresh Token)와 신규 가입 여부를 반환합니다.
+    """
+    )
     public ResponseEntity<TokenResult> kakaoLogin(
             @NotBlank @RequestParam("code") String code) {
         TokenResult result = kakaoLoginService.login(code);
