@@ -4,6 +4,7 @@ import com.project.zighang.oauth2.dto.KakaoUserInfoResponseDto;
 import com.project.zighang.oauth2.dto.LoginResult;
 import com.project.zighang.oauth2.dto.TokenDto;
 import com.project.zighang.oauth2.dto.TokenResult;
+import com.project.zighang.oauth2.entity.TokenEntity;
 import com.project.zighang.oauth2.repository.TokenRepository;
 import com.project.zighang.user.entity.UserEntity;
 import com.project.zighang.user.repository.UserRepository;

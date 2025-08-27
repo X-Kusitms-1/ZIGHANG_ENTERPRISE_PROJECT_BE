@@ -1,4 +1,4 @@
-package com.project.zighang.oauth2.service;
+package com.project.zighang.oauth2.entity;
 
 import com.project.zighang.global.common.BaseEntity;
 import com.project.zighang.user.entity.UserEntity;
