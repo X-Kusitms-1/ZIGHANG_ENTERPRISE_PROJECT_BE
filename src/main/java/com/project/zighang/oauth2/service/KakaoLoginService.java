@@ -20,10 +20,6 @@ import java.util.Optional;
 public class KakaoLoginService {
 
     private final WebClient.Builder webClientBuilder;
-    private final UserRepository userRepository;
-    private final TokenRepository tokenRepository;
-    private final TokenProvider tokenProvider;
-
     private final UserAuthService userAuthService;
 
     @Value("${kakao.client-id}")
@@ -41,17 +37,7 @@ public class KakaoLoginService {
     @Transactional
     public TokenResult login(String code) {
         KakaoUserInfoResponseDto userInfo = getUserInfoByCode(code);
-        LoginResult result = userAuthService.loginOrSignUp(userInfo);
-
-        Optional<TokenEntity> existing = tokenRepository.findByUserEntity(result.user());
-        if (existing.isPresent() && tokenProvider.validateToken(existing.get().getAccessToken())) {
-            TokenDto tokenDto = TokenDto.of(existing.get().getAccessToken(), existing.get().getRefreshToken());
-            return TokenResult.from(tokenDto, result.isNewUser());
-        }
-
-        TokenDto tokenDto = tokenProvider.createToken(result.user());
-        userAuthService.upsertTokenEntity(tokenDto, result.user());
-        return TokenResult.from(tokenDto, result.isNewUser());
+        return userAuthService.processUserAndGetToken(userInfo);
     }
 
     private KakaoUserInfoResponseDto getUserInfoByCode(String code) {

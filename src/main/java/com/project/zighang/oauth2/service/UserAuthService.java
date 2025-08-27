@@ -3,6 +3,7 @@ package com.project.zighang.oauth2.service;
 import com.project.zighang.oauth2.dto.KakaoUserInfoResponseDto;
 import com.project.zighang.oauth2.dto.LoginResult;
 import com.project.zighang.oauth2.dto.TokenDto;
+import com.project.zighang.oauth2.dto.TokenResult;
 import com.project.zighang.oauth2.repository.TokenRepository;
 import com.project.zighang.user.entity.UserEntity;
 import com.project.zighang.user.repository.UserRepository;
@@ -19,10 +20,27 @@ public class UserAuthService {
     private final UserRepository userRepository;
     private final TokenRepository tokenRepository;
 
-    @Transactional
-    public LoginResult loginOrSignUp(KakaoUserInfoResponseDto userInfo) {
-        Long kakaoId = userInfo.getId();
+    private final TokenProvider tokenProvider;
 
+    @Transactional
+    public TokenResult processUserAndGetToken(KakaoUserInfoResponseDto userInfo) {
+        LoginResult loginResult = loginOrSignUp(userInfo);
+        UserEntity user = loginResult.user();
+
+        Optional<TokenEntity> existingToken = tokenRepository.findByUserEntity(user);
+
+        if (existingToken.isPresent() && tokenProvider.validateToken(existingToken.get().getAccessToken())) {
+            TokenDto tokenDto = TokenDto.of(existingToken.get().getAccessToken(), existingToken.get().getRefreshToken());
+            return new TokenResult(tokenDto, loginResult.isNewUser());
+        }
+
+        TokenDto newTokenDto = tokenProvider.createToken(user);
+        upsertTokenEntity(newTokenDto, user);
+        return new TokenResult(newTokenDto, loginResult.isNewUser());
+    }
+
+    private LoginResult loginOrSignUp(KakaoUserInfoResponseDto userInfo) {
+        Long kakaoId = userInfo.getId();
         Optional<UserEntity> userOptional = userRepository.findBySocialId(kakaoId);
 
         if (userOptional.isEmpty()) {
@@ -40,17 +58,14 @@ public class UserAuthService {
                 name = "카카오 사용자";
             }
 
-            UserEntity newUser = userRepository.save(
-                    UserEntity.create(email, name, "kakao", kakaoId)
-            );
+            UserEntity newUser = userRepository.save(UserEntity.create(email, name, "kakao", kakaoId));
             return new LoginResult(newUser, true);
         } else {
             return new LoginResult(userOptional.get(), false);
         }
     }
 
-    @Transactional
-    protected void upsertTokenEntity(TokenDto tokenDto, UserEntity user) {
+    private void upsertTokenEntity(TokenDto tokenDto, UserEntity user) {
         Optional<TokenEntity> existing = tokenRepository.findByUserEntity(user);
         if (existing.isPresent()) {
             existing.get().updateTokens(tokenDto.accessToken(), tokenDto.refreshToken());
