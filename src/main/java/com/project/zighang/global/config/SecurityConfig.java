@@ -33,11 +33,13 @@ public class SecurityConfig {
         http
                 .httpBasic(AbstractHttpConfigurer::disable)
                 .csrf(AbstractHttpConfigurer::disable)
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers(
                                 "/v1/auth/**",
                                 "/swagger-ui/**",
+                                "/swagger-ui.html",
                                 "/v3/api-docs/**"
                         ).permitAll()
                         .anyRequest().authenticated()
@@ -55,10 +57,10 @@ public class SecurityConfig {
         CorsConfiguration configuration = new CorsConfiguration();
 
         configuration.setAllowedOrigins(List.of(
-                "http://localhost:3000", // 프론트엔드 개발 서버
-                "http://localhost:8080",  // 스웨거 등 로컬 환경
-                stagServerBaseUrl, // Staging 서버
-                prodServerBaseUrl  // Production 서버
+                "http://localhost:3000",
+                "http://localhost:8080",
+                stagServerBaseUrl,
+                prodServerBaseUrl
         ));
 
         // 허용할 HTTP 메소드 설정
