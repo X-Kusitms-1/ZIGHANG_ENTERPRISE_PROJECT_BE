@@ -1,11 +1,12 @@
 package com.project.zighang.oauth2.controller;
 
+import com.project.zighang.global.exception.Success;
+import com.project.zighang.global.template.RspTemplate;
 import com.project.zighang.oauth2.dto.TokenResult;
 import com.project.zighang.oauth2.service.KakaoLoginService;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -26,9 +27,10 @@ public class KakaoLoginController {
     처음 로그인한 유저의 경우 isNewUser가 참으로 내려갑니다.
     """
     )
-    public ResponseEntity<TokenResult> kakaoLogin(
-            @NotBlank @RequestParam("code") String code) {
+    public RspTemplate<?> kakaoLogin(
+            @NotBlank @RequestParam("code") String code
+    ) {
         TokenResult result = kakaoLoginService.login(code);
-        return ResponseEntity.ok(result);
+        return RspTemplate.success(Success.CREATE_JWT_TOKEN_SUCCESS, result);
     }
 }
