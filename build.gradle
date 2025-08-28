@@ -20,7 +20,7 @@ configurations {
 }
 
 ext {
-	set('springCloudVersion', '2023.0.x')
+	set('springCloudVersion', '2023.0.6')
 }
 
 dependencyManagement {
@@ -48,15 +48,22 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-webflux'
 
 	//Open Feign
+	// --- Spring Cloud
 	implementation 'org.springframework.cloud:spring-cloud-starter-openfeign'
 
-	//Emailclient
+	// --- Email & Template
 	implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
 	implementation 'org.springframework.boot:spring-boot-starter-mail'
 
-	//s3
+	// --- DB
+	runtimeOnly 'com.mysql:mysql-connector-j'
+	testImplementation 'com.h2database:h2'
+
+	// --- AWS SDK v1 (사용 중이면 유지)
 	implementation 'com.amazonaws:aws-java-sdk-s3:1.12.782'
 
+
+	implementation 'org.springframework.boot:spring-boot-starter-webflux'
 
 }
 
