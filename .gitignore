@@ -43,3 +43,10 @@ src/main/resources/application-prod.properties
 .env
 .DS_Store
 *.p8
+.env
+.vscode/
+.idea/
+node_modules/
+dist/
+*.log
+
