@@ -34,6 +34,7 @@ repositories {
 }
 
 dependencies {
+	// --- Spring Boot Starters (버전 명시 X: Boot BOM이 관리)
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 	implementation 'org.springframework.boot:spring-boot-starter-validation'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
