@@ -1,6 +1,5 @@
 package com.project.zighang.global.redis;
 
-import com.project.zighang.global.exception.ApiResponseCode;
 import com.project.zighang.global.exception.model.BadRequestException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
