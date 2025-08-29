@@ -16,29 +16,21 @@ public class UserOnboardingEntity extends BaseEntity {
     @JoinColumn(name = "user_entity_id")
     private UserEntity userEntity;
 
+    // 신입 -1, 경력은 +1 +2 .. 로 받을 예정
     private Long career;
-
-    private String address;
-
-    @Enumerated(EnumType.STRING)
-    private Industry industry;
 
     private Long dailyRecommendPostCount;
 
-    public static UserOnboardingEntity create(UserEntity userEntity, Long career, String address, Industry industry) {
+    public static UserOnboardingEntity create(UserEntity userEntity, Long career) {
         return UserOnboardingEntity.builder()
                 .userEntity(userEntity)
                 .career(career)
-                .address(address)
-                .industry(industry)
                 .dailyRecommendPostCount(0L)
                 .build();
     }
 
-    public void updateInfo(Long career, String address, Industry industry) {
+    public void updateUserCareer(Long career) {
         this.career = career;
-        this.address = address;
-        this.industry = industry;
     }
 
     public void updateDailyRecommendPostCount(Long dailyRecommendPostCount){
