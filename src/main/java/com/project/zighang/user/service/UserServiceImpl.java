@@ -1,8 +1,7 @@
 package com.project.zighang.user.service;
 
+import com.project.zighang.global.exception.model.BadRequestException;
 import com.project.zighang.global.exception.model.NotFoundException;
-import com.project.zighang.user.dto.AddressDto;
-import com.project.zighang.user.dto.IndustryDto;
 import com.project.zighang.user.dto.PostUserOnboardingDto;
 import com.project.zighang.user.entity.AddressEntity;
 import com.project.zighang.user.entity.IndustryEntity;
@@ -19,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.project.zighang.global.exception.Error;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -41,12 +41,17 @@ public class UserServiceImpl implements UserService {
                 () -> new NotFoundException(Error.NOT_FOUND_USER, Error.NOT_FOUND_USER.getMessage())
         );
 
+        Long career = request.career();
+        if (career == null || career < 0) {
+            throw new BadRequestException(Error.BAD_REQUEST_CAREER_VALUE, Error.BAD_REQUEST_CAREER_VALUE.getMessage());
+        }
+
         // Onboarding Entity
         userOnboardingRepository.findByUserEntity(userEntity)
                 .ifPresentOrElse(
                         onboardingEntity -> {
                             log.info("온보딩 정보가 존재하여 새로운 정보로 수정합니다. userId: {}", userId);
-                            if (!onboardingEntity.getCareer().equals(request.career())) {
+                            if (!Objects.equals(onboardingEntity.getCareer(), request.career())) {
                                 onboardingEntity.updateUserCareer(request.career());
                             }
                         }, () -> {

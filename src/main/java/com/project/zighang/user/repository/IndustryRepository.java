@@ -8,12 +8,10 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
-
 @Repository
 public interface IndustryRepository extends JpaRepository<IndustryEntity, Long> {
 
-    @Modifying
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Query("DELETE FROM IndustryEntity i WHERE i.userEntity = :user")
     void deleteAllByUserEntity(@Param("user") UserEntity user);
 }
