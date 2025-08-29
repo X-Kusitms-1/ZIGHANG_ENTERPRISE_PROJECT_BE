@@ -18,7 +18,7 @@ public enum Success implements ApiResponseCode {
     /**
      * 201 CREATED
      */
-    POST_USER_Onboarding_API_REQUEST_SUCCESS(HttpStatus.CREATED, "유저 오보딩 POST API 호출에 성공했습니다."),
+    POST_USER_Onboarding_API_REQUEST_SUCCESS(HttpStatus.CREATED, "유저 온보딩 POST API 호출에 성공했습니다."),
     CREATE_JWT_TOKEN_SUCCESS(HttpStatus.CREATED, "소셜 로그인 성공 및 JWT 토큰 정상 발급했습니다.");
 
     private final HttpStatus httpStatus;
