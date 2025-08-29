@@ -20,8 +20,11 @@ public class UserController {
 
     private final UserService userService;
 
-    @Operation(summary = "사용자 온보딩 정보")
     @PostMapping("/onboarding")
+    @Operation(
+            summary = "사용자 온보딩 정보 저장",
+            description = "사용자의 초기 온보딩 정보(경력, 관심지역, 관심산업)를 받아 저장하는 API입니다."
+    )
     public RspTemplate<Void> postUserOnboardingInfo(
             @RequestBody PostUserOnboardingDto postUserOnboardingDto
     ) {
