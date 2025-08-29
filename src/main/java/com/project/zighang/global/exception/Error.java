@@ -25,6 +25,7 @@ public enum Error implements ApiResponseCode {
     REDIS_SET_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "Redis에 값을 저장하는 데 실패했습니다."),
     REDIS_GET_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "Redis에서 값을 가져오는 데 실패했습니다."),
     REDIS_DELETE_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "Redis에서 값을 삭제하는 데 실패했습니다."),
+    REDIS_EXISTS_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "Redis에서 키 존재 여부 확인에 실패했습니다."),
     SHA256_GENERATION_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "SHA256 해시 생성에 실패했습니다.");
 
     private final HttpStatus httpStatus;

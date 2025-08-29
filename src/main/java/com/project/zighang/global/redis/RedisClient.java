@@ -48,7 +48,7 @@ public class RedisClient {
         try {
             return redisTemplate.hasKey(key);
         } catch (Exception e) {
-            throw new BadRequestException(Error.SHA256_GENERATION_ERROR, Error.SHA256_GENERATION_ERROR.getMessage());
+            throw new BadRequestException(Error.REDIS_EXISTS_ERROR, Error.REDIS_EXISTS_ERROR.getMessage());
         }
     }
 }
