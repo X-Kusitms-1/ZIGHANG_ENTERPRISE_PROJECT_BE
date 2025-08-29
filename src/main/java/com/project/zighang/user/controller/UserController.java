@@ -23,7 +23,8 @@ public class UserController {
     @Operation(summary = "사용자 온보딩 정보")
     @PostMapping("/onboarding")
     public RspTemplate<Void> postUserOnboardingInfo(
-            @RequestBody PostUserOnboardingDto postUserOnboardingDto) {
+            @RequestBody PostUserOnboardingDto postUserOnboardingDto
+    ) {
         userService.addUserOnboardingInfo(postUserOnboardingDto);
         return RspTemplate.success(Success.POST_USER_Onboarding_API_REQUEST_SUCCESS);
     }
