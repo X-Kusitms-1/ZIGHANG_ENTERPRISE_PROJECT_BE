@@ -6,15 +6,7 @@ import lombok.*;
 import java.time.LocalDate;
 
 @Entity
-@Table(
-        name = "company_news",
-        indexes = {
-                @Index(name = "idx_company_news_company_id", columnList = "company_id")
-        },
-        uniqueConstraints = {
-                @UniqueConstraint(name = "uk_company_news_urlhash", columnNames = "url_hash")
-        }
-)
+@Table(name = "company_news")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
