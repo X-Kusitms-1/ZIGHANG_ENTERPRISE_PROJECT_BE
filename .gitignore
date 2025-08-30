@@ -50,3 +50,4 @@ node_modules/
 dist/
 *.log
 
+deploy/docker-compose.yaml

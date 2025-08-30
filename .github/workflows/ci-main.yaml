@@ -1,7 +1,7 @@
 name: Production Deployment Workflow
 
 on:
-  pull_request:
+  push:
     branches: [ "main" ]
 
 jobs:
