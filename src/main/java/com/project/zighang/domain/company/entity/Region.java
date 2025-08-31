@@ -4,8 +4,9 @@ import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
-@Getter @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@AllArgsConstructor @Builder
+@Getter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class Region {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

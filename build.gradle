@@ -70,7 +70,8 @@ dependencies {
 	// --- AWS SDK v1 (사용 중이면 유지)
 	implementation 'com.amazonaws:aws-java-sdk-s3:1.12.782'
 
-
+	// MAC OS
+	implementation 'io.netty:netty-resolver-dns-native-macos:4.1.68.Final:osx-aarch_64'
 	implementation 'org.springframework.boot:spring-boot-starter-webflux'
 
 	//redis
