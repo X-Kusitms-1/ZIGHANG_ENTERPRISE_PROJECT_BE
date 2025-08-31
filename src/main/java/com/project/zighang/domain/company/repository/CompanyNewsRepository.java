@@ -10,6 +10,15 @@ import java.util.List;
 
 public interface CompanyNewsRepository extends JpaRepository<CompanyNews, Long> {
 
+    @Query("""
+           select n
+           from CompanyNews n
+           where n.company.id = :companyId
+           order by n.publishedAt desc, n.id desc
+           """)
+    List<CompanyNews> findAllByCompanyIdOrderByPublishedDesc(@Param("companyId") Long companyId);
+
+    /** 여러 회사에 대해 회사별 최신 N개만 뽑기 (MySQL 8 윈도우 함수) */
     interface NewsSliceRow {
         Long getCompanyId();
         String getTitle();
@@ -26,7 +35,8 @@ public interface CompanyNewsRepository extends JpaRepository<CompanyNews, Long> 
                thumbnail_url AS thumbnailUrl
         FROM (
             SELECT n.*,
-                   ROW_NUMBER() OVER (PARTITION BY n.company_id ORDER BY n.published_at DESC, n.id DESC) rn
+                   ROW_NUMBER() OVER (PARTITION BY n.company_id
+                                      ORDER BY n.published_at DESC, n.id DESC) rn
             FROM company_news n
             WHERE n.company_id IN (:companyIds)
         ) t

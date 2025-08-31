@@ -2,11 +2,10 @@ package com.project.zighang.domain.company.service;
 
 import com.project.zighang.domain.company.dto.*;
 import com.project.zighang.domain.company.entity.Company;
-import com.project.zighang.domain.company.entity.CompanyNews;
 import com.project.zighang.domain.company.enumerate.CompanyType;
 import com.project.zighang.domain.company.enumerate.JobGroup;
-import com.project.zighang.domain.company.repository.CompanyRepository;
 import com.project.zighang.domain.company.repository.CompanyNewsRepository;
+import com.project.zighang.domain.company.repository.CompanyRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
@@ -14,9 +13,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 import java.util.stream.Collectors;
-
-
-import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -45,36 +41,84 @@ public class CompanyQueryService {
         List<Company> companies = companyPage.getContent();
         List<Long> ids = companies.stream().map(Company::getId).toList();
 
-        // 회사별 최신 3개만 SELECT (네이티브)
+        // 회사별 최신 3개 뉴스만 SELECT
         var rows = companyNewsRepository.findTopNewsByCompanyIds(ids, 3);
 
-        // 회사별 -> 뉴스 DTO 목록
         Map<Long, List<CompanyNewsResponse>> newsMap = rows.stream()
                 .collect(Collectors.groupingBy(
                         CompanyNewsRepository.NewsSliceRow::getCompanyId,
                         LinkedHashMap::new,
                         Collectors.mapping(r -> new CompanyNewsResponse(
-                                r.getTitle(),
-                                r.getUrl(),
-                                r.getPublishedAt(),
-                                r.getThumbnailUrl()
+                                r.getTitle(), r.getUrl(), r.getPublishedAt(), r.getThumbnailUrl()
                         ), Collectors.toList())
                 ));
 
-        // 응답 매핑 (회사 순서 보존)
-        List<CompanyWithNewsResponse> content = new ArrayList<>(companies.size());
-        for (Company c : companies) {
-            var companyDto = new CompanyThumbnailResponse(
-                    c.getId(),
-                    c.getCompanyNameKr(),
-                    c.getCompanyThumbnailUrl(),
-                    c.getCompanyType() != null ? c.getCompanyType().getDescription() : null
-            );
-            var news = newsMap.getOrDefault(c.getId(), List.of());
-            content.add(new CompanyWithNewsResponse(companyDto, news));
-        }
+        List<CompanyWithNewsResponse> content = companies.stream()
+                .map(c -> new CompanyWithNewsResponse(
+                        toCompanyThumb(c),
+                        newsMap.getOrDefault(c.getId(), List.of())
+                ))
+                .toList();
 
         return new PageImpl<>(content, pageable, companyPage.getTotalElements());
+    }
+
+    /** 상세: 회사 전체 뉴스 + 같은 타입 랜덤 3사(각 3뉴스) */
+    public CompanyDetailWithSimilarResponse getDetailWithNewsAndSimilar(Long companyId) {
+        Company company = companyRepository.findById(companyId)
+                .orElseThrow(() -> new NoSuchElementException("Company not found: " + companyId));
+
+        // 회사 요약
+        var companyDto = toCompanyThumb(company);
+
+        // 전체 뉴스 (최신순)
+        var newsEntities = companyNewsRepository.findAllByCompanyIdOrderByPublishedDesc(companyId);
+        List<CompanyNewsResponse> newsAll = newsEntities.stream()
+                .map(n -> new CompanyNewsResponse(n.getTitle(), n.getUrl(), n.getPublishedAt(), n.getThumbnailUrl()))
+                .toList();
+
+        // 유사기업: 동일 CompanyType 랜덤 3개
+        List<CompanyWithNewsResponse> similar = List.of();
+        if (company.getCompanyType() != null) {
+            List<Long> randIds = companyRepository.findRandomIdsByType(company.getCompanyType().name(), company.getId(), 3);
+            if (!randIds.isEmpty()) {
+                List<Company> similars = companyRepository.findAllById(randIds);
+
+                // 각 회사 최신 3개 뉴스
+                var rows = companyNewsRepository.findTopNewsByCompanyIds(randIds, 3);
+                Map<Long, List<CompanyNewsResponse>> newsMap = rows.stream()
+                        .collect(Collectors.groupingBy(
+                                CompanyNewsRepository.NewsSliceRow::getCompanyId,
+                                LinkedHashMap::new,
+                                Collectors.mapping(r -> new CompanyNewsResponse(
+                                        r.getTitle(), r.getUrl(), r.getPublishedAt(), r.getThumbnailUrl()
+                                ), Collectors.toList())
+                        ));
+
+                // 입력 순서(randIds) 보존
+                Map<Long, Integer> order = new HashMap<>();
+                for (int i = 0; i < randIds.size(); i++) order.put(randIds.get(i), i);
+                similars.sort(Comparator.comparingInt(c -> order.getOrDefault(c.getId(), Integer.MAX_VALUE)));
+
+                similar = similars.stream()
+                        .map(s -> new CompanyWithNewsResponse(
+                                toCompanyThumb(s),
+                                newsMap.getOrDefault(s.getId(), List.of())
+                        ))
+                        .toList();
+            }
+        }
+
+        return new CompanyDetailWithSimilarResponse(companyDto, newsAll, similar);
+    }
+
+    private CompanyThumbnailResponse toCompanyThumb(Company c) {
+        return new CompanyThumbnailResponse(
+                c.getId(),
+                c.getCompanyNameKr(),
+                c.getCompanyThumbnailUrl(),
+                c.getCompanyType() != null ? c.getCompanyType().getDescription() : null
+        );
     }
 
     private static <T> Set<T> normalize(Set<T> s) {

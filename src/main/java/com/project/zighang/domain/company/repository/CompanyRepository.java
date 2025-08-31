@@ -8,10 +8,12 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.*;
 import org.springframework.data.repository.query.Param;
 
+import java.util.List;
 import java.util.Set;
 
 public interface CompanyRepository extends JpaRepository<Company, Long> {
 
+    /** 필터 검색 (기존 파라미터 유지: types, jobGroups, regionCodes) */
     @Query(
             value = """
         SELECT DISTINCT c
@@ -55,5 +57,20 @@ public interface CompanyRepository extends JpaRepository<Company, Long> {
             @Param("jobGroups") Set<JobGroup> jobGroups,
             @Param("regionCodes") Set<String> regionCodes,
             Pageable pageable
+    );
+
+    /** 동일 타입에서 자기 자신 제외하고 무작위로 3개 id 추출 (MySQL) */
+    @Query(value = """
+        SELECT id
+        FROM company
+        WHERE company_type = :type
+          AND id <> :excludeId
+        ORDER BY RAND()
+        LIMIT :limit
+    """, nativeQuery = true)
+    List<Long> findRandomIdsByType(
+            @Param("type") String companyTypeEnumName, // 예: "LARGE_ENTERPRISE"
+            @Param("excludeId") Long excludeId,
+            @Param("limit") int limit
     );
 }

@@ -1,18 +1,13 @@
 package com.project.zighang.domain.company.controller;
 
 import com.project.zighang.domain.company.dto.CompanyWithNewsResponse;
+import com.project.zighang.domain.company.dto.CompanyDetailWithSimilarResponse;
 import com.project.zighang.domain.company.enumerate.CompanyType;
 import com.project.zighang.domain.company.enumerate.JobGroup;
 import com.project.zighang.domain.company.service.CompanyQueryService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.data.domain.*;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Set;
 
@@ -39,5 +34,11 @@ public class CompanyController {
                 s[0]);
         Pageable pageable = PageRequest.of(page, size, springSort);
         return companyQueryService.searchWithNews(types, jobGroups, regionCodes, pageable);
+    }
+
+    /** 상세: 회사 전체 뉴스 + 같은 타입 랜덤 3사(각 3뉴스) */
+    @GetMapping("/{companyId}/detail")
+    public CompanyDetailWithSimilarResponse getDetail(@PathVariable Long companyId) {
+        return companyQueryService.getDetailWithNewsAndSimilar(companyId);
     }
 }
