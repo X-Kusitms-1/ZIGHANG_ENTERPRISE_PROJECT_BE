@@ -28,7 +28,7 @@ public class Company extends BaseEntity {
     @Column(nullable = false, length = 255)
     private String companyNameKr;
 
-    @Column(nullable = false, length = 1200)
+    @Column(length = 1200)
     private String companyThumbnailUrl;
 
     @Enumerated(EnumType.STRING)
