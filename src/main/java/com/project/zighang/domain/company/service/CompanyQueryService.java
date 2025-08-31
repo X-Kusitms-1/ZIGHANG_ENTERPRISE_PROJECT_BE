@@ -44,11 +44,11 @@ public class CompanyQueryService {
         // 회사별 최신 3개 뉴스만 SELECT
         var rows = companyNewsRepository.findTopNewsByCompanyIds(ids, 3);
 
-        Map<Long, List<CompanyNewsResponse>> newsMap = rows.stream()
+        Map<Long, List<CompanyNews>> newsMap = rows.stream()
                 .collect(Collectors.groupingBy(
                         CompanyNewsRepository.NewsSliceRow::getCompanyId,
                         LinkedHashMap::new,
-                        Collectors.mapping(r -> new CompanyNewsResponse(
+                        Collectors.mapping(r -> new CompanyNews(
                                 r.getTitle(), r.getUrl(), r.getPublishedAt(), r.getThumbnailUrl()
                         ), Collectors.toList())
                 ));
@@ -73,8 +73,8 @@ public class CompanyQueryService {
 
         // 전체 뉴스 (최신순)
         var newsEntities = companyNewsRepository.findAllByCompanyIdOrderByPublishedDesc(companyId);
-        List<CompanyNewsResponse> newsAll = newsEntities.stream()
-                .map(n -> new CompanyNewsResponse(n.getTitle(), n.getUrl(), n.getPublishedAt(), n.getThumbnailUrl()))
+        List<CompanyNews> newsAll = newsEntities.stream()
+                .map(n -> new CompanyNews(n.getTitle(), n.getUrl(), n.getPublishedAt(), n.getThumbnailUrl()))
                 .toList();
 
         // 유사기업: 동일 CompanyType 랜덤 3개
@@ -86,11 +86,11 @@ public class CompanyQueryService {
 
                 // 각 회사 최신 3개 뉴스
                 var rows = companyNewsRepository.findTopNewsByCompanyIds(randIds, 3);
-                Map<Long, List<CompanyNewsResponse>> newsMap = rows.stream()
+                Map<Long, List<CompanyNews>> newsMap = rows.stream()
                         .collect(Collectors.groupingBy(
                                 CompanyNewsRepository.NewsSliceRow::getCompanyId,
                                 LinkedHashMap::new,
-                                Collectors.mapping(r -> new CompanyNewsResponse(
+                                Collectors.mapping(r -> new CompanyNews(
                                         r.getTitle(), r.getUrl(), r.getPublishedAt(), r.getThumbnailUrl()
                                 ), Collectors.toList())
                         ));
@@ -112,8 +112,8 @@ public class CompanyQueryService {
         return new CompanyDetailWithSimilarResponse(companyDto, newsAll, similar);
     }
 
-    private CompanyThumbnailResponse toCompanyThumb(Company c) {
-        return new CompanyThumbnailResponse(
+    private CompanyThumbnail toCompanyThumb(Company c) {
+        return new CompanyThumbnail(
                 c.getId(),
                 c.getCompanyNameKr(),
                 c.getCompanyThumbnailUrl(),

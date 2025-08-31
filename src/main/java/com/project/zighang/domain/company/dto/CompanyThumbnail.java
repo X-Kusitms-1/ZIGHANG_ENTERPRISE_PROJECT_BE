@@ -1,6 +1,6 @@
 package com.project.zighang.domain.company.dto;
 
-public record CompanyThumbnailResponse(
+public record CompanyThumbnail(
         Long id,
 
         String companyNameKr,

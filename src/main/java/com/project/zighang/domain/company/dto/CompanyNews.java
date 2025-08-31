@@ -2,7 +2,7 @@ package com.project.zighang.domain.company.dto;
 
 import java.time.LocalDate;
 
-public record CompanyNewsResponse(
+public record CompanyNews(
         String title,
 
         String url,

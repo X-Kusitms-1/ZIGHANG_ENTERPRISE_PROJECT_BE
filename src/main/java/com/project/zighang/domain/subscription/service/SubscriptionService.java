@@ -3,7 +3,7 @@ package com.project.zighang.domain.subscription.service;
 import com.project.zighang.domain.subscription.entity.UserCompanySubscription;
 import com.project.zighang.domain.subscription.exception.model.AlreadyExistException;
 import com.project.zighang.domain.subscription.exception.model.SubscriptionInternalException;
-import com.project.zighang.domain.subscription.repository.UserCompanySubscriptionRepository;
+import com.project.zighang.domain.subscription.repository.SubscriptionRepository;
 import com.project.zighang.global.exception.CustomException;
 import com.project.zighang.global.exception.Error;
 import lombok.RequiredArgsConstructor;
@@ -16,7 +16,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class SubscriptionService {
 
-    private final UserCompanySubscriptionRepository repository;
+    private final SubscriptionRepository repository;
 
     /**
      * 구독 등록
