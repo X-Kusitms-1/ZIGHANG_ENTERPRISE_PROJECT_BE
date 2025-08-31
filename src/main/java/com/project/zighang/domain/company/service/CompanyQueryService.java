@@ -6,6 +6,7 @@ import com.project.zighang.domain.company.enumerate.CompanyType;
 import com.project.zighang.domain.company.enumerate.JobGroup;
 import com.project.zighang.domain.company.repository.CompanyNewsRepository;
 import com.project.zighang.domain.company.repository.CompanyRepository;
+import com.project.zighang.domain.subscription.service.SubscriptionFinder;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
@@ -21,6 +22,43 @@ public class CompanyQueryService {
 
     private final CompanyRepository companyRepository;
     private final CompanyNewsRepository companyNewsRepository;
+    private final SubscriptionFinder subscriptionFinder;
+
+    public List<CompanyWithNewsResponse> getSubscribedCompaniesWithNews(Long userId) {
+        List<Long> companyIds = subscriptionFinder.findSubscribedCompanyIds(userId);
+        if (companyIds.isEmpty()) {
+            return List.of();
+        }
+
+        List<Company> companies = companyRepository.findAllById(companyIds);
+        if (companies.isEmpty()) {
+            return List.of();
+        }
+
+        // 회사별 최신 3개 뉴스만 SELECT
+        List<CompanyNewsRepository.NewsSliceRow> rows = companyNewsRepository.findTopNewsByCompanyIds(companyIds, 3);
+
+        Map<Long, List<CompanyNews>> newsMap = rows.stream()
+                .collect(Collectors.groupingBy(
+                        CompanyNewsRepository.NewsSliceRow::getCompanyId,
+                        LinkedHashMap::new,
+                        Collectors.mapping(r -> new CompanyNews(
+                                r.getTitle(), r.getUrl(), r.getPublishedAt(), r.getThumbnailUrl()
+                        ), Collectors.toList())
+                ));
+
+        // 입력 순서(companyIds) 보존
+        Map<Long, Integer> order = new HashMap<>();
+        for (int i = 0; i < companyIds.size(); i++) order.put(companyIds.get(i), i);
+        companies.sort(Comparator.comparingInt(c -> order.getOrDefault(c.getId(), Integer.MAX_VALUE)));
+
+        return companies.stream()
+                .map(c -> new CompanyWithNewsResponse(
+                        toCompanyThumb(c),
+                        newsMap.getOrDefault(c.getId(), List.of())
+                ))
+                .toList();
+    }
 
     /** 필터 유지 + 회사별 최신 뉴스 3개 */
     public Page<CompanyWithNewsResponse> searchWithNews(

@@ -5,11 +5,14 @@ import com.project.zighang.domain.company.dto.CompanyDetailWithSimilarResponse;
 import com.project.zighang.domain.company.enumerate.CompanyType;
 import com.project.zighang.domain.company.enumerate.JobGroup;
 import com.project.zighang.domain.company.service.CompanyQueryService;
+import com.project.zighang.global.exception.Success;
+import com.project.zighang.global.template.RspTemplate;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.*;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Set;
+import java.util.List;
 
 @RestController
 @RequestMapping("/v1/companies")
@@ -40,5 +43,10 @@ public class CompanyController {
     @GetMapping("/{companyId}")
     public CompanyDetailWithSimilarResponse getDetail(@PathVariable Long companyId) {
         return companyQueryService.getDetailWithNewsAndSimilar(companyId);
+    }
+
+    @GetMapping("{userId}/subscriptions")
+    public RspTemplate<List<CompanyWithNewsResponse>> getSubscribedCompaniesWithNews(@PathVariable Long userId) {
+        return RspTemplate.success(Success.SUBSCRIBE_SUCCESS, companyQueryService.getSubscribedCompaniesWithNews(userId));
     }
 }

@@ -40,6 +40,4 @@ public class SubscriptionController {
 
         return RspTemplate.success(Success.UNSUBSCRIBE_SUCCESS, subscriptionResponse);
     }
-
-
 }
