@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Set;
 
 @RestController
-@RequestMapping("/api/companies")
+@RequestMapping("/v1/companies")
 @RequiredArgsConstructor
 public class CompanyController {
 
@@ -20,7 +20,7 @@ public class CompanyController {
 
     // 예:
     // /api/companies/search-with-news?types=LARGE_ENTERPRISE&jobGroups=DATA_AI&regionCodes=SEOUL&page=0&size=20
-    @GetMapping("/search-with-news")
+    @GetMapping
     public Page<CompanyWithNewsResponse> searchWithNews(
             @RequestParam(required = false) Set<CompanyType> types,
             @RequestParam(required = false) Set<JobGroup> jobGroups,
@@ -37,7 +37,7 @@ public class CompanyController {
     }
 
     /** 상세: 회사 전체 뉴스 + 같은 타입 랜덤 3사(각 3뉴스) */
-    @GetMapping("/{companyId}/detail")
+    @GetMapping("/{companyId}")
     public CompanyDetailWithSimilarResponse getDetail(@PathVariable Long companyId) {
         return companyQueryService.getDetailWithNewsAndSimilar(companyId);
     }
