@@ -32,8 +32,9 @@ public class PostController {
             @RequestParam(value = "page", defaultValue = "1") int page,
             @RequestParam(value = "size", defaultValue = "10") int size
     ) {
-        int pageInIndex = page - 1;
-        Page<PostResponseDto> postPage = postService.getAllPostList(pageInIndex, size);
+        int pageInIndex = Math.max(page, 1) - 1;
+        int safeSize = Math.max(size, 1);
+        Page<PostResponseDto> postPage = postService.getAllPostList(pageInIndex, safeSize);
         return RspTemplate.success(Success.GET_API_REQUEST_SUCCESS, PageDto.from(postPage));
     }
 }

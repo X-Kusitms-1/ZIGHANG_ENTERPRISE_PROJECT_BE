@@ -22,10 +22,9 @@ public class PostServiceImpl implements PostService {
     @Override
     @Transactional(readOnly = true)
     public Page<PostResponseDto> getAllPostList(int page, int size) {
-        if (size > MAX_SIZE) {
-            size = MAX_SIZE;
-        }
-        return getAllPostListByRepository(page, size).map(PostResponseDto::from);
+        int normalizedSize = Math.min(Math.max(size, 1), MAX_SIZE);
+        int normalizedPage = Math.max(page, 0);
+        return getAllPostListByRepository(normalizedPage, normalizedSize).map(PostResponseDto::from);
     }
 
     private Page<PostEntity> getAllPostListByRepository(int page, int size) {
