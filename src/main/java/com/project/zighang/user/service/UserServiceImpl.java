@@ -46,6 +46,9 @@ public class UserServiceImpl implements UserService {
         if (minCareer == null || minCareer < 0 || maxCareer == null || maxCareer < 0) {
             throw new BadRequestException(Error.BAD_REQUEST_CAREER_VALUE, Error.BAD_REQUEST_CAREER_VALUE.getMessage());
         }
+        if (minCareer > maxCareer) {
+            throw new BadRequestException(Error.BAD_REQUEST_CAREER_VALUE, "minCareer는 maxCareer보다 클 수 없습니다.");
+        }
 
         // Onboarding Entity
         userOnboardingRepository.findByUserEntity(userEntity)
