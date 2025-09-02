@@ -21,6 +21,8 @@ public class UserOnboardingEntity extends BaseEntity {
 
     private Long maxCareer;
 
+    private Long careerYears;
+
     private Long dailyRecommendPostCount;
 
     public static UserOnboardingEntity create(UserEntity userEntity, Long minCareer, Long maxCareer) {
@@ -28,6 +30,7 @@ public class UserOnboardingEntity extends BaseEntity {
                 .userEntity(userEntity)
                 .minCareer(minCareer)
                 .maxCareer(maxCareer)
+                .careerYears(Math.max(0, maxCareer - minCareer))
                 .dailyRecommendPostCount(0L)
                 .build();
     }
@@ -35,9 +38,14 @@ public class UserOnboardingEntity extends BaseEntity {
     public void updateUserCareer(Long minCareer, Long maxCareer) {
         this.minCareer = minCareer;
         this.maxCareer = maxCareer;
+        updateCareerYears();
     }
 
     public void updateDailyRecommendPostCount(Long dailyRecommendPostCount){
         this.dailyRecommendPostCount = dailyRecommendPostCount;
+    }
+
+    private void updateCareerYears() {
+        careerYears = Math.max(0, maxCareer - minCareer);
     }
 }
