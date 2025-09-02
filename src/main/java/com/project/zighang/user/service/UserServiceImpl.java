@@ -41,8 +41,9 @@ public class UserServiceImpl implements UserService {
                 () -> new NotFoundException(Error.NOT_FOUND_USER, Error.NOT_FOUND_USER.getMessage())
         );
 
-        Long career = request.career();
-        if (career == null || career < 0) {
+        Long minCareer = request.minCareer();
+        Long maxCareer = request.maxCareer();
+        if (minCareer == null || minCareer < 0 || maxCareer == null || maxCareer < 0) {
             throw new BadRequestException(Error.BAD_REQUEST_CAREER_VALUE, Error.BAD_REQUEST_CAREER_VALUE.getMessage());
         }
 
@@ -50,14 +51,11 @@ public class UserServiceImpl implements UserService {
         userOnboardingRepository.findByUserEntity(userEntity)
                 .ifPresentOrElse(
                         onboardingEntity -> {
-                            log.info("온보딩 정보가 존재하여 새로운 정보로 수정합니다. userId: {}", userId);
-                            if (!Objects.equals(onboardingEntity.getCareer(), request.career())) {
-                                onboardingEntity.updateUserCareer(request.career());
-                            }
+                            log.error("이미 온보딩 정보가 존재합니다. userId: {}", userId);
                         }, () -> {
                             log.info("온보딩 정보가 없어 새로 저장합니다. userId: {}", userId);
                             UserOnboardingEntity userOnboardingEntity = UserOnboardingEntity.create(
-                                    userEntity, request.career());
+                                    userEntity, request.minCareer(), request.maxCareer());
                             userOnboardingRepository.save(userOnboardingEntity);
                             log.info("새로운 온보딩 정보를 저장했습니다.");
                         }
