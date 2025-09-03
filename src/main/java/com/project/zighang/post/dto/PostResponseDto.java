@@ -14,7 +14,7 @@ public record PostResponseDto(
         Integer minCareer,  // 최소 경력
         Integer maxCareer,  // 최대 경력
         String recruitmentEndDate,
-        String summaryData,
+//        String summaryData,
         String recruitmentOriginUrl,
         List<String> depthTwo
 ) {
@@ -26,7 +26,7 @@ public record PostResponseDto(
                 entity.getMinCareer(),
                 entity.getMaxCareer(),
                 entity.getRecruitmentEndDate(),
-                entity.getSummaryData(),
+//                entity.getSummaryData(),
                 entity.getRecruitmentOriginalUrl(),
                 cleanRawDepthTwoString(entity.getDepthTwo())
         );
