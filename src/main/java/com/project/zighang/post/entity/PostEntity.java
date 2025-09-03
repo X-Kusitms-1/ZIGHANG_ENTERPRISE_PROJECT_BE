@@ -16,7 +16,7 @@ public class PostEntity {
     private Long recruitmentId;
 
     @Lob
-    @Column(name = "recruitmentOriginalUrl", length = 65535)
+    @Column(name = "recruitment_original_url", length = 65535)
     private String recruitmentOriginalUrl;
 
     @Column(name = "uuid", unique = true, nullable = false, length = 36)

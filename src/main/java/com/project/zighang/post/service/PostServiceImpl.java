@@ -24,7 +24,8 @@ public class PostServiceImpl implements PostService {
     public Page<PostResponseDto> getAllPostList(int page, int size) {
         int normalizedSize = Math.min(Math.max(size, 1), MAX_SIZE);
         int normalizedPage = Math.max(page, 0);
-        return getAllPostListByRepository(normalizedPage, normalizedSize).map(PostResponseDto::from);
+        return getAllPostListByRepository(normalizedPage, normalizedSize)
+                .map(PostResponseDto::from);
     }
 
     private Page<PostEntity> getAllPostListByRepository(int page, int size) {
