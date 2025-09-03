@@ -31,7 +31,7 @@ public class PostServiceImpl implements PostService {
     }
 
     private Page<PostEntity> getAllPostListByRepository(int page, int size) {
-        Pageable pageable = PageRequest.of(page, size, Sort.by("score").descending());
+        Pageable pageable = PageRequest.of(page, size, Sort.by("viewCount").descending());
         return postEntityRepository.findAll(pageable);
     }
 }

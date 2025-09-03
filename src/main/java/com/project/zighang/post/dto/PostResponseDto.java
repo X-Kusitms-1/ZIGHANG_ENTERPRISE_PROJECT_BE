@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
 
 public record PostResponseDto(
         Long recruitmentId,
+        Integer viewCount,
         String title,
         String recruitmentRegion,
         Integer minCareer,
@@ -24,6 +25,7 @@ public record PostResponseDto(
     public static PostResponseDto from(PostEntity entity) {
         return new PostResponseDto(
                 entity.getRecruitmentId(),
+                entity.getViewCount(),
                 entity.getTitle(),
                 entity.getRecruitmentRegion(),
                 entity.getMinCareer(),
