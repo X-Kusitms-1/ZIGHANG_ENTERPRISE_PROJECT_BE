@@ -2,19 +2,22 @@ package com.project.zighang.post.dto;
 
 import com.project.zighang.post.entity.PostEntity;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
 public record PostResponseDto(
-        Long recruitmentId, // pk
-        String title,   // 공고명
-        String recruitmentRegion,   // 지역
-        Integer minCareer,  // 최소 경력
-        Integer maxCareer,  // 최대 경력
+        Long recruitmentId,
+        String title,
+        String recruitmentRegion,
+        Integer minCareer,
+        Integer maxCareer,
         String recruitmentEndDate,
-//        String summaryData,
+        String companyName,
+        String workSummary,
         String recruitmentOriginUrl,
         List<String> depthTwo
 ) {
@@ -26,7 +29,8 @@ public record PostResponseDto(
                 entity.getMinCareer(),
                 entity.getMaxCareer(),
                 entity.getRecruitmentEndDate(),
-//                entity.getSummaryData(),
+                filterValueInSummaryColumn("회사 명", entity.getSummaryData()),
+                filterValueInSummaryColumn("직무 명", entity.getSummaryData()),
                 entity.getRecruitmentOriginalUrl(),
                 cleanRawDepthTwoString(entity.getDepthTwo())
         );
@@ -39,5 +43,20 @@ public record PostResponseDto(
         return Arrays.stream(data.split(","))
                 .map(s -> s.trim().replace("'", ""))
                 .collect(Collectors.toList());
+    }
+
+    private static String filterValueInSummaryColumn(String value, String summary) {
+        if (summary == null || summary.isBlank()) {
+            return null;
+        }
+
+        Pattern pattern = Pattern.compile("\\*\\*" + Pattern.quote(value) + "\\*\\*\\s*:\\s*(.*)");
+        Matcher matcher = pattern.matcher(summary);
+
+        if (matcher.find()) {
+            return matcher.group(1).trim();
+        }
+
+        return null;
     }
 }
