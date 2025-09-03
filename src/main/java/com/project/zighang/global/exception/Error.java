@@ -13,6 +13,7 @@ public enum Error implements ApiResponseCode {
      * 400 BAD REQUEST EXCEPTION
      */
     BAD_CLIENT_REQUEST(HttpStatus.BAD_REQUEST, "잘못된 API 요청입니다."),
+    BAD_REQUEST_APPLY_COUNT_VALUE(HttpStatus.BAD_REQUEST, "오늘의 공고 개수는 0개 이상이어야 합니다."),
     BAD_REQUEST_CAREER_VALUE(HttpStatus.BAD_REQUEST, "잘못된 커리어 데이터입니다."),
 
     /**

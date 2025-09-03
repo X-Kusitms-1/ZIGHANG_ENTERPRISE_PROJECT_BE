@@ -85,7 +85,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public void setUserApplyCount(PostUserTodayApplyCountDTO request) {
         if (request.applyCount() < 0) {
-            throw  new BadRequestException(Error.BAD_CLIENT_REQUEST, Error.BAD_CLIENT_REQUEST.getMessage());
+            throw  new BadRequestException(Error.BAD_REQUEST_APPLY_COUNT_VALUE, Error.BAD_REQUEST_APPLY_COUNT_VALUE.getMessage());
         }
 
         Long userId = request.userId();
