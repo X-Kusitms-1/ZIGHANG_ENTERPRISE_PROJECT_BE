@@ -22,9 +22,9 @@ public enum Success implements ApiResponseCode {
     POST_USER_Onboarding_API_REQUEST_SUCCESS(HttpStatus.CREATED, "유저 온보딩 POST API 호출에 성공했습니다."),
     CREATE_JWT_TOKEN_SUCCESS(HttpStatus.CREATED, "소셜 로그인 성공 및 JWT 토큰 정상 발급했습니다."),
     SUBSCRIBE_SUCCESS(HttpStatus.CREATED, "정상적으로 구독됐습니다."),
+    POST_JOB_APPLY(HttpStatus.CREATED, "정상적으로 공고에 지원했습니다."),
 
     POST_USER_APPLY_COUNT_API_REQUEST_SUCCESS(HttpStatus.OK, "유저 하루 추천 공고 개수가 설정되었습니다.");
-
 
 
 

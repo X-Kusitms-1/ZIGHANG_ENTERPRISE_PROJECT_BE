@@ -15,12 +15,14 @@ public enum Error implements ApiResponseCode {
     BAD_CLIENT_REQUEST(HttpStatus.BAD_REQUEST, "잘못된 API 요청입니다."),
     BAD_REQUEST_APPLY_COUNT_VALUE(HttpStatus.BAD_REQUEST, "오늘의 공고 개수는 0개 이상이어야 합니다."),
     BAD_REQUEST_CAREER_VALUE(HttpStatus.BAD_REQUEST, "잘못된 커리어 데이터입니다."),
+    BAD_REQUEST_ALREADY_APPLIED(HttpStatus.BAD_REQUEST, "이미 지원한 공고입니다."),
 
     /**
      * 404 NOT FOUND
      */
     NOT_FOUND_USER(HttpStatus.NOT_FOUND, "존재하지 않는 사용자 정보입니다."),
     NOT_FOUND_USER_ONBOARDING(HttpStatus.NOT_FOUND, "존재하지 않는 사용자 온보딩 정보입니다."),
+    NOT_FOUND_POST(HttpStatus.NOT_FOUND, "존재하지 않는 공고입니다."),
 
     /**
      * Redis Error

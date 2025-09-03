@@ -1,7 +1,11 @@
 package com.project.zighang.post.service;
 
 import com.project.zighang.global.exception.Error;
+import com.project.zighang.global.exception.model.BadRequestException;
 import com.project.zighang.global.exception.model.NotFoundException;
+import com.project.zighang.post.dto.PostApplyJobDto;
+import com.project.zighang.post.entity.PostApplyEntity;
+import com.project.zighang.post.repository.PostApplyEntityRepository;
 import com.project.zighang.post.repository.PostEntityRepository;
 import com.project.zighang.post.dto.PostResponseDto;
 import com.project.zighang.post.entity.PostEntity;
@@ -20,27 +24,24 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 @Service
+@Transactional
 @RequiredArgsConstructor
 public class PostServiceImpl implements PostService {
 
     private final PostEntityRepository postEntityRepository;
     private final UserOnboardingRepository userOnboardingRepository;
     private final UserRepository userRepository;
+    private final PostApplyEntityRepository postApplyEntityRepository;
 
     private static final int MAX_SIZE = 50;
 
     @Override
     @Transactional(readOnly = true)
     public Page<PostResponseDto> getAllPostList(int page, int size) {
-        int normalizedSize = Math.min(Math.max(size, 1), MAX_SIZE);
         int normalizedPage = Math.max(page, 0);
-        return getAllPostListByRepository(normalizedPage, normalizedSize)
-                .map(PostResponseDto::from);
-    }
-
-    private Page<PostEntity> getAllPostListByRepository(int page, int size) {
-        Pageable pageable = PageRequest.of(page, size, Sort.by("viewCount").descending());
-        return postEntityRepository.findAll(pageable);
+        int normalizedSize = Math.min(Math.max(size, 1), MAX_SIZE);
+        Pageable pageable = PageRequest.of(normalizedPage, normalizedSize, Sort.by("viewCount").descending());
+        return findPostsByViewCount(pageable).map(PostResponseDto::from);
     }
 
     @Override
@@ -56,7 +57,7 @@ public class PostServiceImpl implements PostService {
 
         Long applyPostCount = userOnboardingEntity.getDailyRecommendPostCount();
         if (applyPostCount != null && applyPostCount >= 0) {
-            return getAllPostListByRepository(Math.toIntExact(applyPostCount))
+            return findTopNPostsByViewCount(Math.toIntExact(applyPostCount))
                     .stream()
                     .map(PostResponseDto::from)
                     .toList();
@@ -65,8 +66,28 @@ public class PostServiceImpl implements PostService {
         return List.of();
     }
 
-    private List<PostEntity> getAllPostListByRepository(int applyPostCount) {
-        Pageable pageable = PageRequest.of(0, applyPostCount, Sort.by("viewCount").descending());
+    @Override
+    public void applyJobPost(PostApplyJobDto request) {
+        UserEntity userEntity = userRepository.findById(request.userId()).orElseThrow(
+                () -> new NotFoundException(Error.NOT_FOUND_USER, Error.NOT_FOUND_USER.getMessage())
+        );
+        PostEntity postEntity = postEntityRepository.findById(request.recruitmentId()).orElseThrow(
+                () -> new NotFoundException(Error.NOT_FOUND_POST, Error.NOT_FOUND_POST.getMessage())
+        );
+
+        if (postApplyEntityRepository.existsByUserEntityAndPostEntity(userEntity, postEntity)) {
+            throw new BadRequestException(Error.BAD_REQUEST_ALREADY_APPLIED, Error.BAD_REQUEST_ALREADY_APPLIED.getMessage());
+        }
+
+        postApplyEntityRepository.save(PostApplyEntity.create(userEntity, postEntity));
+    }
+
+    private Page<PostEntity> findPostsByViewCount(Pageable pageable) {
+        return postEntityRepository.findAll(pageable);
+    }
+
+    private List<PostEntity> findTopNPostsByViewCount(int count) {
+        Pageable pageable = PageRequest.of(0, count, Sort.by("viewCount").descending());
         return postEntityRepository.findAll(pageable).getContent();
     }
 }

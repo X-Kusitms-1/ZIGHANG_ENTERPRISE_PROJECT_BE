@@ -2,8 +2,8 @@ package com.project.zighang.post.controller;
 
 import com.project.zighang.global.exception.Success;
 import com.project.zighang.global.template.RspTemplate;
-import com.project.zighang.post.dto.GetTodayApplyPostDto;
 import com.project.zighang.post.dto.PageDto;
+import com.project.zighang.post.dto.PostApplyJobDto;
 import com.project.zighang.post.dto.PostResponseDto;
 import com.project.zighang.post.service.PostServiceImpl;
 import io.swagger.v3.oas.annotations.Operation;
@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/job-post")
+@RequestMapping("/api/post")
 @RequiredArgsConstructor
 public class PostController {
 
@@ -45,5 +45,14 @@ public class PostController {
     ) {
         List<PostResponseDto> todayApplyPosts = postService.getTodayApplyPostList(userId);
         return RspTemplate.success(Success.GET_API_REQUEST_SUCCESS, todayApplyPosts);
+    }
+
+    @PostMapping("/apply")
+    @Operation(summary = "공고 지원", description = "이미 지원한 공고는 다시 지원할 수 없습니다.")
+    public RspTemplate<?> applyInJobPost(
+            @RequestBody PostApplyJobDto request
+    ) {
+        postService.applyJobPost(request);
+        return RspTemplate.success(Success.POST_JOB_APPLY);
     }
 }
