@@ -19,6 +19,7 @@ public enum Error implements ApiResponseCode {
      * 404 NOT FOUND
      */
     NOT_FOUND_USER(HttpStatus.NOT_FOUND, "존재하지 않는 사용자 정보입니다."),
+    NOT_FOUND_USER_ONBOARDING(HttpStatus.NOT_FOUND, "존재하지 않는 사용자 온보딩 정보입니다."),
 
     /**
      * Redis Error
