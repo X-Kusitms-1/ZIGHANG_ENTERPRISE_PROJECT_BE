@@ -17,23 +17,35 @@ public class UserOnboardingEntity extends BaseEntity {
     private UserEntity userEntity;
 
     // 신입 -1, 경력은 +1 +2 .. 로 받을 예정
-    private Long career;
+    private Long minCareer;
+
+    private Long maxCareer;
+
+    private Long careerYears;
 
     private Long dailyRecommendPostCount;
 
-    public static UserOnboardingEntity create(UserEntity userEntity, Long career) {
+    public static UserOnboardingEntity create(UserEntity userEntity, Long minCareer, Long maxCareer) {
         return UserOnboardingEntity.builder()
                 .userEntity(userEntity)
-                .career(career)
+                .minCareer(minCareer)
+                .maxCareer(maxCareer)
+                .careerYears(Math.max(0, maxCareer - minCareer))
                 .dailyRecommendPostCount(0L)
                 .build();
     }
 
-    public void updateUserCareer(Long career) {
-        this.career = career;
+    public void updateUserCareer(Long minCareer, Long maxCareer) {
+        this.minCareer = minCareer;
+        this.maxCareer = maxCareer;
+        updateCareerYears();
     }
 
     public void updateDailyRecommendPostCount(Long dailyRecommendPostCount){
         this.dailyRecommendPostCount = dailyRecommendPostCount;
+    }
+
+    private void updateCareerYears() {
+        careerYears = Math.max(0, maxCareer - minCareer);
     }
 }

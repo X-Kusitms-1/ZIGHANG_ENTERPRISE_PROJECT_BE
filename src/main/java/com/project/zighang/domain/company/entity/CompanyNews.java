@@ -6,8 +6,8 @@ import lombok.*;
 import java.time.LocalDate;
 
 @Entity
-@Table(name = "company_news")
 @Getter
+@Table(name = "company_news")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class CompanyNews extends BaseEntity {
@@ -16,14 +16,14 @@ public class CompanyNews extends BaseEntity {
     @JoinColumn(name = "company_id", foreignKey = @ForeignKey(name = "fk_company_news_company"))
     private Company company;
 
-    @Column(nullable = false, columnDefinition = "varchar(1000)")
+    @Column(nullable = false, length = 1000)
     private String title;
 
-    @Column(columnDefinition = "varchar(2048)")
+    @Column(length = 2000)
     private String url;
 
-    private LocalDate publishedAt;
+        private LocalDate publishedAt;
 
-    @Column(columnDefinition = "varchar(2048)")
+    @Column(length = 2000)
     private String thumbnailUrl;
 }
