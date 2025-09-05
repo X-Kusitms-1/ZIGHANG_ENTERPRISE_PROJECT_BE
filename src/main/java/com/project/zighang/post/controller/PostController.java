@@ -5,7 +5,7 @@ import com.project.zighang.global.template.RspTemplate;
 import com.project.zighang.post.dto.PageDto;
 import com.project.zighang.post.dto.PostApplyJobDto;
 import com.project.zighang.post.dto.PostResponseDto;
-import com.project.zighang.post.service.PostServiceImpl;
+import com.project.zighang.post.service.PostService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.Parameters;
@@ -20,7 +20,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class PostController {
 
-    private final PostServiceImpl postService;
+    private final PostService postService;
 
     @GetMapping
     @Operation(summary = "공고 전체 목록 조회", description = "채용공고 목록을 페이지네이션하여 조회합니다. score 기반 내림차순 정렬입니다.")

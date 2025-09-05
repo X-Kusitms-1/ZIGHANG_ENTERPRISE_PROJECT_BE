@@ -48,11 +48,11 @@ public class PostServiceImpl implements PostService {
     public List<PostResponseDto> getTodayApplyPostList(Long userId) {
         UserEntity userEntity = userRepository.findById(userId).orElseThrow(
                 () -> new NotFoundException(
-                        com.project.zighang.global.exception.Error.NOT_FOUND_USER, com.project.zighang.global.exception.Error.NOT_FOUND_USER.getMessage())
+                        Error.NOT_FOUND_USER, com.project.zighang.global.exception.Error.NOT_FOUND_USER.getMessage())
         );
         UserOnboardingEntity userOnboardingEntity = userOnboardingRepository.findByUserEntity(userEntity).orElseThrow(
                 () -> new NotFoundException(
-                        com.project.zighang.global.exception.Error.NOT_FOUND_USER_ONBOARDING, Error.NOT_FOUND_USER_ONBOARDING.getMessage())
+                        Error.NOT_FOUND_USER_ONBOARDING, Error.NOT_FOUND_USER_ONBOARDING.getMessage())
         );
 
         Long applyPostCount = userOnboardingEntity.getDailyRecommendPostCount();
