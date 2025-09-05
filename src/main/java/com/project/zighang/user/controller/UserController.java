@@ -1,15 +1,20 @@
 package com.project.zighang.user.controller;
 
+import com.project.zighang.global.exception.Error;
 import com.project.zighang.global.exception.Success;
+import com.project.zighang.global.exception.model.NotFoundException;
 import com.project.zighang.global.template.RspTemplate;
 import com.project.zighang.user.dto.PostUserOnboardingDto;
 import com.project.zighang.user.dto.PostUserTodayApplyCountDTO;
+import com.project.zighang.user.entity.UserEntity;
+import com.project.zighang.user.entity.UserDetailsImpl;
 import com.project.zighang.user.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @Slf4j
@@ -31,9 +36,11 @@ public class UserController {
             @ApiResponse(responseCode = "404", description = "존재하지 않는 사용자 정보입니다.")
     })
     public RspTemplate<Void> postUserOnboardingInfo(
+            @AuthenticationPrincipal UserDetailsImpl userDetails,
             @RequestBody PostUserOnboardingDto postUserOnboardingDto
     ) {
-        userService.addUserOnboardingInfo(postUserOnboardingDto);
+        UserEntity loginUser = getUserEntityFromUserDetailsImpl(userDetails);
+        userService.addUserOnboardingInfo(postUserOnboardingDto, loginUser);
         return RspTemplate.success(Success.POST_USER_Onboarding_API_REQUEST_SUCCESS);
     }
 
@@ -42,9 +49,18 @@ public class UserController {
             summary = "사용자 오늘의 지원 개수 정보 저장"
     )
     public RspTemplate<?> postUserTodayApplyCount(
+            @AuthenticationPrincipal UserDetailsImpl userDetails,
             @RequestBody PostUserTodayApplyCountDTO dto
     ) {
-        userService.setUserApplyCount(dto);
+        UserEntity loginUser = getUserEntityFromUserDetailsImpl(userDetails);
+        userService.setUserApplyCount(dto, loginUser);
         return RspTemplate.success(Success.POST_USER_APPLY_COUNT_API_REQUEST_SUCCESS);
+    }
+
+    private UserEntity getUserEntityFromUserDetailsImpl(UserDetailsImpl userDetails) throws RuntimeException {
+        if (userDetails == null) {
+            throw new NotFoundException(Error.NOT_FOUND_USER, Error.NOT_FOUND_USER.getMessage());
+        }
+        return userDetails.getUserEntity();
     }
 }

@@ -45,12 +45,8 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public List<PostResponseDto> getTodayApplyPostList(Long userId) {
-        UserEntity userEntity = userRepository.findById(userId).orElseThrow(
-                () -> new NotFoundException(
-                        Error.NOT_FOUND_USER, com.project.zighang.global.exception.Error.NOT_FOUND_USER.getMessage())
-        );
-        UserOnboardingEntity userOnboardingEntity = userOnboardingRepository.findByUserEntity(userEntity).orElseThrow(
+    public List<PostResponseDto> getTodayApplyPostList(UserEntity loginUser) {
+        UserOnboardingEntity userOnboardingEntity = userOnboardingRepository.findByUserEntity(loginUser).orElseThrow(
                 () -> new NotFoundException(
                         Error.NOT_FOUND_USER_ONBOARDING, Error.NOT_FOUND_USER_ONBOARDING.getMessage())
         );
@@ -67,19 +63,16 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public void applyJobPost(PostApplyJobDto request) {
-        UserEntity userEntity = userRepository.findById(request.userId()).orElseThrow(
-                () -> new NotFoundException(Error.NOT_FOUND_USER, Error.NOT_FOUND_USER.getMessage())
-        );
+    public void applyJobPost(PostApplyJobDto request, UserEntity loginUser) {
         PostEntity postEntity = postEntityRepository.findById(request.recruitmentId()).orElseThrow(
                 () -> new NotFoundException(Error.NOT_FOUND_POST, Error.NOT_FOUND_POST.getMessage())
         );
 
-        if (postApplyEntityRepository.existsByUserEntityAndPostEntity(userEntity, postEntity)) {
+        if (postApplyEntityRepository.existsByUserEntityAndPostEntity(loginUser, postEntity)) {
             throw new BadRequestException(Error.BAD_REQUEST_ALREADY_APPLIED, Error.BAD_REQUEST_ALREADY_APPLIED.getMessage());
         }
 
-        postApplyEntityRepository.save(PostApplyEntity.create(userEntity, postEntity));
+        postApplyEntityRepository.save(PostApplyEntity.create(loginUser, postEntity));
     }
 
     private Page<PostEntity> findPostsByViewCount(Pageable pageable) {

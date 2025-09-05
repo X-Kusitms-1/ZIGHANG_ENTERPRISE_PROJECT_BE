@@ -2,13 +2,14 @@ package com.project.zighang.post.service;
 
 import com.project.zighang.post.dto.PostApplyJobDto;
 import com.project.zighang.post.dto.PostResponseDto;
+import com.project.zighang.user.entity.UserEntity;
 import org.springframework.data.domain.Page;
 
 import java.util.List;
 
 public interface PostService {
     Page<PostResponseDto> getAllPostList(int page, int size);
-    List<PostResponseDto> getTodayApplyPostList(Long userId);
+    List<PostResponseDto> getTodayApplyPostList(UserEntity loginUser);
 
-    void applyJobPost(PostApplyJobDto request);
+    void applyJobPost(PostApplyJobDto request, UserEntity loginUser);
 }
