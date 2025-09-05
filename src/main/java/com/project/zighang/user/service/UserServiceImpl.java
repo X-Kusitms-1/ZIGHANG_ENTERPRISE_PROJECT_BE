@@ -33,13 +33,7 @@ public class UserServiceImpl implements UserService {
     private final IndustryRepository industryRepository;
 
     @Override
-    public void addUserOnboardingInfo(PostUserOnboardingDto request) {
-        Long userId = request.userId();
-        // User Entity 유무 확인, User Entity는 소셜 로그인 과정에서 생성되어 디비에 저장됨
-        UserEntity userEntity = userRepository.findById(userId).orElseThrow(
-                () -> new NotFoundException(Error.NOT_FOUND_USER, Error.NOT_FOUND_USER.getMessage())
-        );
-
+    public void addUserOnboardingInfo(PostUserOnboardingDto request, UserEntity loginUser) {
         Long minCareer = request.minCareer();
         Long maxCareer = request.maxCareer();
         if (minCareer == null || minCareer < 0 || maxCareer == null || maxCareer < 0) {
@@ -50,49 +44,45 @@ public class UserServiceImpl implements UserService {
         }
 
         // Onboarding Entity
-        userOnboardingRepository.findByUserEntity(userEntity)
+        userOnboardingRepository.findByUserEntity(loginUser)
                 .ifPresentOrElse(
                         onboardingEntity -> {
-                            log.error("이미 온보딩 정보가 존재합니다. userId: {}", userId);
+                            log.error("이미 온보딩 정보가 존재합니다. userId: {}", loginUser.getId());
                         }, () -> {
-                            log.info("온보딩 정보가 없어 새로 저장합니다. userId: {}", userId);
+                            log.info("온보딩 정보가 없어 새로 저장합니다. userId: {}", loginUser.getId());
                             UserOnboardingEntity userOnboardingEntity = UserOnboardingEntity.create(
-                                    userEntity, request.minCareer(), request.maxCareer());
+                                    loginUser, request.minCareer(), request.maxCareer());
                             userOnboardingRepository.save(userOnboardingEntity);
                             log.info("새로운 온보딩 정보를 저장했습니다.");
                         }
                 );
 
         // Address Entity
-        addressRepository.deleteAllByUserEntity(userEntity);
+        addressRepository.deleteAllByUserEntity(loginUser);
 
         List<AddressEntity> newAddresses = request.addressList().stream()
-                .map(dto -> AddressEntity.create(dto.city(), dto.district(), userEntity))
+                .map(dto -> AddressEntity.create(dto.city(), dto.district(), loginUser))
                 .collect(Collectors.toList());
 
         addressRepository.saveAll(newAddresses);
 
         // Industry Entity
-        industryRepository.deleteAllByUserEntity(userEntity);
+        industryRepository.deleteAllByUserEntity(loginUser);
 
         List<IndustryEntity> newIndustries = request.industryList().stream()
-                .map(dto -> IndustryEntity.create(dto.jobFamily(), dto.role(), userEntity))
+                .map(dto -> IndustryEntity.create(dto.jobFamily(), dto.role(), loginUser))
                 .collect(Collectors.toList());
 
         industryRepository.saveAll(newIndustries);
     }
 
     @Override
-    public void setUserApplyCount(PostUserTodayApplyCountDTO request) {
+    public void setUserApplyCount(PostUserTodayApplyCountDTO request, UserEntity loginUser) {
         if (request.applyCount() < 0) {
             throw  new BadRequestException(Error.BAD_REQUEST_APPLY_COUNT_VALUE, Error.BAD_REQUEST_APPLY_COUNT_VALUE.getMessage());
         }
 
-        Long userId = request.userId();
-        UserEntity userEntity = userRepository.findById(userId).orElseThrow(
-                () -> new NotFoundException(Error.NOT_FOUND_USER, Error.NOT_FOUND_USER.getMessage())
-        );
-        UserOnboardingEntity userOnboardingEntity = userOnboardingRepository.findByUserEntity(userEntity).orElseThrow(
+        UserOnboardingEntity userOnboardingEntity = userOnboardingRepository.findByUserEntity(loginUser).orElseThrow(
                 () -> new NotFoundException(Error.NOT_FOUND_USER_ONBOARDING, Error.NOT_FOUND_USER_ONBOARDING.getMessage())
         );
 
