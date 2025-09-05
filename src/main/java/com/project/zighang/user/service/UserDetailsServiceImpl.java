@@ -2,6 +2,7 @@ package com.project.zighang.user.service;
 
 import com.project.zighang.global.exception.Error;
 import com.project.zighang.global.exception.model.NotFoundException;
+import com.project.zighang.user.entity.UserDetailsImpl;
 import com.project.zighang.user.entity.UserEntity;
 import com.project.zighang.user.repository.UserRepository;
 

@@ -9,7 +9,7 @@ import com.project.zighang.post.dto.PostApplyJobDto;
 import com.project.zighang.post.dto.PostResponseDto;
 import com.project.zighang.post.service.PostService;
 import com.project.zighang.user.entity.UserEntity;
-import com.project.zighang.user.service.UserDetailsImpl;
+import com.project.zighang.user.entity.UserDetailsImpl;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.Parameters;

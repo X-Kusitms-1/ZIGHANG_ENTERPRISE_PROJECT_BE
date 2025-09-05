@@ -1,6 +1,5 @@
-package com.project.zighang.user.service;
+package com.project.zighang.user.entity;
 
-import com.project.zighang.user.entity.UserEntity;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;

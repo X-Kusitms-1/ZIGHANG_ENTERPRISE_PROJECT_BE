@@ -7,7 +7,7 @@ import com.project.zighang.global.template.RspTemplate;
 import com.project.zighang.user.dto.PostUserOnboardingDto;
 import com.project.zighang.user.dto.PostUserTodayApplyCountDTO;
 import com.project.zighang.user.entity.UserEntity;
-import com.project.zighang.user.service.UserDetailsImpl;
+import com.project.zighang.user.entity.UserDetailsImpl;
 import com.project.zighang.user.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
