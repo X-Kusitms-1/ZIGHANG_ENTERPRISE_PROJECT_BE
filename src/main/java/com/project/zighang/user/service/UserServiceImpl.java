@@ -3,6 +3,7 @@ package com.project.zighang.user.service;
 import com.project.zighang.global.exception.model.BadRequestException;
 import com.project.zighang.global.exception.model.NotFoundException;
 import com.project.zighang.user.dto.PostUserOnboardingDto;
+import com.project.zighang.user.dto.PostUserTodayApplyCountDTO;
 import com.project.zighang.user.entity.AddressEntity;
 import com.project.zighang.user.entity.IndustryEntity;
 import com.project.zighang.user.entity.UserEntity;
@@ -18,7 +19,6 @@ import org.springframework.transaction.annotation.Transactional;
 import com.project.zighang.global.exception.Error;
 
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -35,7 +35,6 @@ public class UserServiceImpl implements UserService {
     @Override
     public void addUserOnboardingInfo(PostUserOnboardingDto request) {
         Long userId = request.userId();
-
         // User Entity 유무 확인, User Entity는 소셜 로그인 과정에서 생성되어 디비에 저장됨
         UserEntity userEntity = userRepository.findById(userId).orElseThrow(
                 () -> new NotFoundException(Error.NOT_FOUND_USER, Error.NOT_FOUND_USER.getMessage())
@@ -81,5 +80,22 @@ public class UserServiceImpl implements UserService {
                 .collect(Collectors.toList());
 
         industryRepository.saveAll(newIndustries);
+    }
+
+    @Override
+    public void setUserApplyCount(PostUserTodayApplyCountDTO request) {
+        if (request.applyCount() < 0) {
+            throw  new BadRequestException(Error.BAD_REQUEST_APPLY_COUNT_VALUE, Error.BAD_REQUEST_APPLY_COUNT_VALUE.getMessage());
+        }
+
+        Long userId = request.userId();
+        UserEntity userEntity = userRepository.findById(userId).orElseThrow(
+                () -> new NotFoundException(Error.NOT_FOUND_USER, Error.NOT_FOUND_USER.getMessage())
+        );
+        UserOnboardingEntity userOnboardingEntity = userOnboardingRepository.findByUserEntity(userEntity).orElseThrow(
+                () -> new NotFoundException(Error.NOT_FOUND_USER_ONBOARDING, Error.NOT_FOUND_USER_ONBOARDING.getMessage())
+        );
+
+        userOnboardingEntity.updateDailyRecommendPostCount(request.applyCount());
     }
 }

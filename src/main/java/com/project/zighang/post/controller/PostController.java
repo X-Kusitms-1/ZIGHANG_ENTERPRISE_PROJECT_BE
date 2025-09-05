@@ -3,24 +3,24 @@ package com.project.zighang.post.controller;
 import com.project.zighang.global.exception.Success;
 import com.project.zighang.global.template.RspTemplate;
 import com.project.zighang.post.dto.PageDto;
+import com.project.zighang.post.dto.PostApplyJobDto;
 import com.project.zighang.post.dto.PostResponseDto;
-import com.project.zighang.post.service.PostServiceImpl;
+import com.project.zighang.post.service.PostService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.Parameters;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
-@RequestMapping("/api/job-post")
+@RequestMapping("/api/post")
 @RequiredArgsConstructor
 public class PostController {
 
-    private final PostServiceImpl postService;
+    private final PostService postService;
 
     @GetMapping
     @Operation(summary = "공고 전체 목록 조회", description = "채용공고 목록을 페이지네이션하여 조회합니다. score 기반 내림차순 정렬입니다.")
@@ -36,5 +36,23 @@ public class PostController {
         int safeSize = Math.max(size, 1);
         Page<PostResponseDto> postPage = postService.getAllPostList(pageInIndex, safeSize);
         return RspTemplate.success(Success.GET_API_REQUEST_SUCCESS, PageDto.from(postPage));
+    }
+
+    @GetMapping("/today-apply")
+    @Operation(summary = "오늘의 추천 공고 목록 조회")
+    public RspTemplate<?> getTodayApplyPosts(
+            @RequestParam Long userId
+    ) {
+        List<PostResponseDto> todayApplyPosts = postService.getTodayApplyPostList(userId);
+        return RspTemplate.success(Success.GET_API_REQUEST_SUCCESS, todayApplyPosts);
+    }
+
+    @PostMapping("/apply")
+    @Operation(summary = "공고 지원", description = "이미 지원한 공고는 다시 지원할 수 없습니다.")
+    public RspTemplate<?> applyInJobPost(
+            @RequestBody PostApplyJobDto request
+    ) {
+        postService.applyJobPost(request);
+        return RspTemplate.success(Success.POST_JOB_APPLY);
     }
 }

@@ -3,16 +3,14 @@ package com.project.zighang.user.controller;
 import com.project.zighang.global.exception.Success;
 import com.project.zighang.global.template.RspTemplate;
 import com.project.zighang.user.dto.PostUserOnboardingDto;
+import com.project.zighang.user.dto.PostUserTodayApplyCountDTO;
 import com.project.zighang.user.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @Slf4j
 @RestController
@@ -37,5 +35,16 @@ public class UserController {
     ) {
         userService.addUserOnboardingInfo(postUserOnboardingDto);
         return RspTemplate.success(Success.POST_USER_Onboarding_API_REQUEST_SUCCESS);
+    }
+
+    @PostMapping("/today-apply")
+    @Operation(
+            summary = "사용자 오늘의 지원 개수 정보 저장"
+    )
+    public RspTemplate<?> postUserTodayApplyCount(
+            @RequestBody PostUserTodayApplyCountDTO dto
+    ) {
+        userService.setUserApplyCount(dto);
+        return RspTemplate.success(Success.POST_USER_APPLY_COUNT_API_REQUEST_SUCCESS);
     }
 }
