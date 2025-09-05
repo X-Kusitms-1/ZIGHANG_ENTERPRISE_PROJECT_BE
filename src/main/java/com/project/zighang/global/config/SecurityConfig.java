@@ -27,6 +27,7 @@ public class SecurityConfig {
 
     @Value("${swagger.staging.server.url}") String stagServerBaseUrl;
     @Value("${swagger.production.server.url}") String prodServerBaseUrl;
+    @Value("${swagger.client.server.url}") String clientBaseUrl;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -62,6 +63,7 @@ public class SecurityConfig {
         configuration.setAllowedOrigins(List.of(
                 "http://localhost:3000",
                 "http://localhost:8080",
+                clientBaseUrl,
                 stagServerBaseUrl,
                 prodServerBaseUrl
         ));
