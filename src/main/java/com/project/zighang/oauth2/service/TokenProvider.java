@@ -11,6 +11,8 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Component;
 import java.security.Key;
 import java.util.Collections;
@@ -25,9 +27,12 @@ public class TokenProvider {
     private final long accessTokenValidityTime;
     private final long refreshTokenValidityTime;
 
+    private final UserDetailsService userDetailsService;
+
     public TokenProvider(@Value("${jwt.secret}") String secretKey,
                          @Value("${jwt.access-token-validity-in-milliseconds}") long accessTokenValidityTime,
-                         @Value("${jwt.refresh-token-validity-in-milliseconds}") long refreshTokenValidityTime) {
+                         @Value("${jwt.refresh-token-validity-in-milliseconds}") long refreshTokenValidityTime, UserDetailsService userDetailsService) {
+        this.userDetailsService = userDetailsService;
         byte[] keyBytes = Decoders.BASE64.decode(secretKey);
         this.key = Keys.hmacShaKeyFor(keyBytes);
         this.accessTokenValidityTime = accessTokenValidityTime;
@@ -58,13 +63,9 @@ public class TokenProvider {
 
     public Authentication getAuthentication(String accessToken) {
         Claims claims = parseClaims(accessToken);
-
-        // 권한이 없으므로 빈 리스트를 전달
-        List<GrantedAuthority> authorities = Collections.emptyList();
-
-        User principal = new User(claims.getSubject(), "", authorities);
-
-        return new UsernamePasswordAuthenticationToken(principal, "", principal.getAuthorities());
+        String userId = claims.getSubject();
+        UserDetails userDetails = userDetailsService.loadUserByUsername(userId);
+        return new UsernamePasswordAuthenticationToken(userDetails, "", userDetails.getAuthorities());
     }
 
     private Claims parseClaims(String accessToken) {
