@@ -25,8 +25,9 @@ public class KakaoLoginController {
     @Operation(
             summary = "카카오 소셜 로그인",
             description = """
-    카카오 인가 코드로 소셜 로그인을 진행하며, 성공 시 서비스 자체 JWT(Access/Refresh Token)와 신규 가입 여부를 반환합니다.
-    처음 로그인한 유저의 경우 isNewUser가 참으로 내려갑니다.
+    카카오 인가 코드로 소셜 로그인을 진행합니다.
+    성공 시, 서비스 자체 JWT(Access/Refresh Token)는 응답의 HttpOnly 쿠키에 설정됩니다.
+    이후, isNewUser 값을 쿼리 파라미터로 포함하여 프론트엔드의 콜백 URL로 리다이렉트합니다.
     """
     )
     public void kakaoLoginAndRedirect(
