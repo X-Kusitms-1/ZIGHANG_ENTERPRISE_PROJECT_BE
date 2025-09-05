@@ -1,16 +1,18 @@
 package com.project.zighang.oauth2.controller;
 
-import com.project.zighang.global.exception.Success;
-import com.project.zighang.global.template.RspTemplate;
 import com.project.zighang.oauth2.dto.TokenResult;
 import com.project.zighang.oauth2.service.KakaoLoginService;
 import io.swagger.v3.oas.annotations.Operation;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.io.IOException;
 
 @RestController
 @RequestMapping("/v1/auth/kakao")
@@ -27,10 +29,28 @@ public class KakaoLoginController {
     처음 로그인한 유저의 경우 isNewUser가 참으로 내려갑니다.
     """
     )
-    public RspTemplate<?> kakaoLogin(
-            @NotBlank @RequestParam("code") String code
-    ) {
+    public void kakaoLoginAndRedirect(
+            @NotBlank @RequestParam("code") String code,
+            HttpServletResponse response
+    ) throws IOException {
         TokenResult result = kakaoLoginService.login(code);
-        return RspTemplate.success(Success.CREATE_JWT_TOKEN_SUCCESS, result);
+        Cookie accessTokenCookie = new Cookie("accessToken", result.tokenDto().accessToken());
+        accessTokenCookie.setPath("/");
+        accessTokenCookie.setHttpOnly(true);
+        accessTokenCookie.setMaxAge(60 * 60 * 24);
+
+        Cookie refreshTokenCookie = new Cookie("refreshToken", result.tokenDto().refreshToken());
+        refreshTokenCookie.setPath("/");
+        refreshTokenCookie.setHttpOnly(true);
+        refreshTokenCookie.setMaxAge(60 * 60 * 24 * 7);
+
+        response.addCookie(accessTokenCookie);
+        response.addCookie(refreshTokenCookie);
+
+        String redirectUrl = String.format(
+                "http://localhost:3000/auth/kakao/callback?isNewUser=%b",
+                result.isNewUser()
+        );
+        response.sendRedirect(redirectUrl);
     }
 }
