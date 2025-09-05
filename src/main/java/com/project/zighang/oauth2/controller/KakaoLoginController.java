@@ -7,6 +7,7 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -20,6 +21,9 @@ import java.io.IOException;
 public class KakaoLoginController {
 
     private final KakaoLoginService kakaoLoginService;
+
+    @Value("${login.redirect-url.frontend}")
+    private String frontendRedirectUrl;
 
     @GetMapping
     @Operation(
@@ -49,7 +53,8 @@ public class KakaoLoginController {
         response.addCookie(refreshTokenCookie);
 
         String redirectUrl = String.format(
-                "http://localhost:3000/auth/kakao/callback?isNewUser=%b",
+                "%s?isNewUser=%b",
+                frontendRedirectUrl,
                 result.isNewUser()
         );
         response.sendRedirect(redirectUrl);
