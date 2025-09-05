@@ -4,8 +4,6 @@ import com.project.zighang.global.common.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.time.Instant;
-
 @Getter
 @Builder
 @Entity
