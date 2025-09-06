@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.ResponseCookie;
 
 import java.io.IOException;
 
@@ -26,6 +27,8 @@ public class KakaoLoginController {
 
     @Value("${login.redirect-url.frontend}")
     private String frontendRedirectUrl;
+
+    private final boolean useHttps = false;
 
     @GetMapping
     @Operation(
@@ -44,18 +47,11 @@ public class KakaoLoginController {
         TokenResult result = kakaoLoginService.login(code);
         log.info("Kakao login successful. New user status: {}", result.isNewUser());
 
-        Cookie accessTokenCookie = new Cookie("accessToken", result.tokenDto().accessToken());
-        accessTokenCookie.setPath("/");
-//        accessTokenCookie.setHttpOnly(true);
-        accessTokenCookie.setMaxAge(60 * 60 * 24);
+        ResponseCookie accessTokenCookie = createCookie("accessToken", result.tokenDto().accessToken(), 60 * 60 * 24);
+        ResponseCookie refreshTokenCookie = createCookie("refreshToken", result.tokenDto().refreshToken(), 60 * 60 * 24 * 7);
 
-        Cookie refreshTokenCookie = new Cookie("refreshToken", result.tokenDto().refreshToken());
-        refreshTokenCookie.setPath("/");
-//        refreshTokenCookie.setHttpOnly(true);
-        refreshTokenCookie.setMaxAge(60 * 60 * 24 * 7);
-
-        response.addCookie(accessTokenCookie);
-        response.addCookie(refreshTokenCookie);
+        response.addHeader("Set-Cookie", accessTokenCookie.toString());
+        response.addHeader("Set-Cookie", refreshTokenCookie.toString());
 
         String redirectUrl = String.format(
                 "%s?isNewUser=%b",
@@ -65,5 +61,23 @@ public class KakaoLoginController {
 
         log.info("Redirecting user to: {}", redirectUrl);
         response.sendRedirect(redirectUrl);
+    }
+    
+    private ResponseCookie createCookie(String key, String value, int maxAge) {
+        ResponseCookie.ResponseCookieBuilder builder = ResponseCookie.from(key, value)
+                .path("/")
+                .maxAge(maxAge);
+//                .httpOnly(true);
+
+        if (useHttps) {
+            builder.secure(true) // HTTPS 환경에서만 Secure 설정
+                    .sameSite("None"); // Cross-Origin 통신을 위해 None 설정
+        } else {
+            // HTTP 환경에서는 SameSite=None을 설정할 수 없으므로,
+            // 기본값(Lax)을 사용하거나 명시적으로 Lax로 설정합니다.
+            builder.sameSite("Lax");
+        }
+
+        return builder.build();
     }
 }
