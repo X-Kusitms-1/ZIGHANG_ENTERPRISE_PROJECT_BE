@@ -3,7 +3,6 @@ package com.project.zighang.oauth2.controller;
 import com.project.zighang.oauth2.dto.TokenResult;
 import com.project.zighang.oauth2.service.KakaoLoginService;
 import io.swagger.v3.oas.annotations.Operation;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
@@ -27,8 +26,6 @@ public class KakaoLoginController {
 
     @Value("${login.redirect-url.frontend}")
     private String frontendRedirectUrl;
-
-    private final boolean useHttps = false;
 
     @GetMapping
     @Operation(
@@ -54,9 +51,8 @@ public class KakaoLoginController {
         response.addHeader("Set-Cookie", refreshTokenCookie.toString());
 
         String redirectUrl = String.format(
-                "%s?isNewUser=%b",
-                frontendRedirectUrl,
-                result.isNewUser()
+                "%s",
+                frontendRedirectUrl
         );
 
         log.info("Redirecting user to: {}", redirectUrl);
@@ -69,15 +65,7 @@ public class KakaoLoginController {
                 .maxAge(maxAge);
 //                .httpOnly(true);
 
-        if (useHttps) {
-            builder.secure(true) // HTTPS 환경에서만 Secure 설정
-                    .sameSite("None"); // Cross-Origin 통신을 위해 None 설정
-        } else {
-            // HTTP 환경에서는 SameSite=None을 설정할 수 없으므로,
-            // 기본값(Lax)을 사용하거나 명시적으로 Lax로 설정합니다.
-            builder.sameSite("Lax");
-        }
-
+        builder.secure(true).sameSite("None");
         return builder.build();
     }
 }
