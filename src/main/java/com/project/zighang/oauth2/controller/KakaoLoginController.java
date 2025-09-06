@@ -7,6 +7,7 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.io.IOException;
 
+@Slf4j
 @RestController
 @RequestMapping("/v1/auth/kakao")
 @RequiredArgsConstructor
@@ -38,15 +40,18 @@ public class KakaoLoginController {
             @NotBlank @RequestParam("code") String code,
             HttpServletResponse response
     ) throws IOException {
+        log.info("Kakao login callback received. Authorization code processed.");
         TokenResult result = kakaoLoginService.login(code);
+        log.info("Kakao login successful. New user status: {}", result.isNewUser());
+
         Cookie accessTokenCookie = new Cookie("accessToken", result.tokenDto().accessToken());
         accessTokenCookie.setPath("/");
-        accessTokenCookie.setHttpOnly(true);
+//        accessTokenCookie.setHttpOnly(true);
         accessTokenCookie.setMaxAge(60 * 60 * 24);
 
         Cookie refreshTokenCookie = new Cookie("refreshToken", result.tokenDto().refreshToken());
         refreshTokenCookie.setPath("/");
-        refreshTokenCookie.setHttpOnly(true);
+//        refreshTokenCookie.setHttpOnly(true);
         refreshTokenCookie.setMaxAge(60 * 60 * 24 * 7);
 
         response.addCookie(accessTokenCookie);
@@ -57,6 +62,8 @@ public class KakaoLoginController {
                 frontendRedirectUrl,
                 result.isNewUser()
         );
+
+        log.info("Redirecting user to: {}", redirectUrl);
         response.sendRedirect(redirectUrl);
     }
 }
