@@ -40,7 +40,9 @@ public class UserController {
             @RequestBody PostUserOnboardingDto postUserOnboardingDto
     ) {
         UserEntity loginUser = getUserEntityFromUserDetailsImpl(userDetails);
+        log.info("START postUserOnboardingInfo for user: {}", loginUser.getId());
         userService.addUserOnboardingInfo(postUserOnboardingDto, loginUser);
+        log.info("SUCCESS postUserOnboardingInfo for user: {}", loginUser.getId());
         return RspTemplate.success(Success.POST_USER_Onboarding_API_REQUEST_SUCCESS);
     }
 
@@ -53,12 +55,15 @@ public class UserController {
             @RequestBody PostUserTodayApplyCountDTO dto
     ) {
         UserEntity loginUser = getUserEntityFromUserDetailsImpl(userDetails);
+        log.info("START postUserTodayApplyCount for user: {}, count: {}", loginUser.getId(), dto.applyCount());
         userService.setUserApplyCount(dto, loginUser);
+        log.info("SUCCESS postUserTodayApplyCount for user: {}", loginUser.getId());
         return RspTemplate.success(Success.POST_USER_APPLY_COUNT_API_REQUEST_SUCCESS);
     }
 
     private UserEntity getUserEntityFromUserDetailsImpl(UserDetailsImpl userDetails) throws RuntimeException {
         if (userDetails == null) {
+            log.warn("Authentication failed: UserDetailsImpl object is null.");
             throw new NotFoundException(Error.NOT_FOUND_USER, Error.NOT_FOUND_USER.getMessage());
         }
         return userDetails.getUserEntity();
