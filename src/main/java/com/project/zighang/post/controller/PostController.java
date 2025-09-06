@@ -64,6 +64,16 @@ public class PostController {
         return RspTemplate.success(Success.POST_JOB_APPLY);
     }
 
+    @GetMapping("/apply-history")
+    @Operation(summary = "지난 지원 목록 조회")
+    public RspTemplate<?> getUserApplyHistory(
+            @AuthenticationPrincipal UserDetailsImpl userDetails
+    ) {
+        UserEntity loginUser = getUserEntityFromUserDetailsImpl(userDetails);
+        List<PostResponseDto> userApplyHistory = postService.getAllUserApplyHistory(loginUser);
+        return RspTemplate.success(Success.GET_API_REQUEST_SUCCESS, userApplyHistory);
+    }
+
     private UserEntity getUserEntityFromUserDetailsImpl(UserDetailsImpl userDetails) throws RuntimeException {
         if (userDetails == null) {
             throw new NotFoundException(com.project.zighang.global.exception.Error.NOT_FOUND_USER, Error.NOT_FOUND_USER.getMessage());

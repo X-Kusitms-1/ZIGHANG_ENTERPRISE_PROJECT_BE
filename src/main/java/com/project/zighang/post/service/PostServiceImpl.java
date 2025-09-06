@@ -22,6 +22,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -30,7 +31,6 @@ public class PostServiceImpl implements PostService {
 
     private final PostEntityRepository postEntityRepository;
     private final UserOnboardingRepository userOnboardingRepository;
-    private final UserRepository userRepository;
     private final PostApplyEntityRepository postApplyEntityRepository;
 
     private static final int MAX_SIZE = 50;
@@ -60,6 +60,15 @@ public class PostServiceImpl implements PostService {
         }
 
         return List.of();
+    }
+
+    @Override
+    public List<PostResponseDto> getAllUserApplyHistory(UserEntity loginUser) {
+        List<PostApplyEntity> postApplyEntityList = postApplyEntityRepository.findAllByUserEntityWithPostFetch(loginUser);
+        return postApplyEntityList.stream()
+                .map(PostApplyEntity::getPostEntity)
+                .map(PostResponseDto::from)
+                .toList();
     }
 
     @Override
