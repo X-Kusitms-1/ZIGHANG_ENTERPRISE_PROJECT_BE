@@ -38,7 +38,6 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers(
-                                "https://zighang.vercel.app/",
                                 "/api/companies/**",
                                 "/**",
                                 "/v1/auth/**",
