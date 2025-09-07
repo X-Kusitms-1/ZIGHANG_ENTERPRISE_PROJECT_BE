@@ -10,4 +10,5 @@ import java.util.Optional;
 @Repository
 public interface UserOnboardingRepository extends JpaRepository<UserOnboardingEntity, Long> {
     Optional<UserOnboardingEntity> findByUserEntity(UserEntity userEntity);
+    boolean existsByUserEntity(UserEntity userEntity);
 }

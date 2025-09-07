@@ -7,4 +7,5 @@ import com.project.zighang.user.entity.UserEntity;
 public interface UserService {
     void addUserOnboardingInfo(PostUserOnboardingDto request, UserEntity loginUser);
     void setUserApplyCount(PostUserTodayApplyCountDTO request, UserEntity loginUser);
+    boolean isUserOnboarded(UserEntity loginUser);
 }
