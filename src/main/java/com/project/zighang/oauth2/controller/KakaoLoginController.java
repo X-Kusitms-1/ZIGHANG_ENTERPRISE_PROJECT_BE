@@ -2,6 +2,7 @@ package com.project.zighang.oauth2.controller;
 
 import com.project.zighang.oauth2.dto.TokenResult;
 import com.project.zighang.oauth2.service.KakaoLoginService;
+import feign.template.UriUtils;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.constraints.NotBlank;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.http.ResponseCookie;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 
 @Slf4j
 @RestController
@@ -42,7 +44,7 @@ public class KakaoLoginController {
     ) throws IOException {
         log.info("Kakao login callback received. Authorization code processed.");
         TokenResult result = kakaoLoginService.login(code);
-        log.info("Kakao login successful. New user status: {}", result.isNewUser());
+        log.info("Kakao login successful. New user status: {}", result.userName());
 
         ResponseCookie accessTokenCookie = createCookie("accessToken", result.tokenDto().accessToken(), 60 * 60 * 24);
         ResponseCookie refreshTokenCookie = createCookie("refreshToken", result.tokenDto().refreshToken(), 60 * 60 * 24 * 7);
@@ -50,9 +52,11 @@ public class KakaoLoginController {
         response.addHeader("Set-Cookie", accessTokenCookie.toString());
         response.addHeader("Set-Cookie", refreshTokenCookie.toString());
 
+        String encodedName = UriUtils.encode(result.userName(), StandardCharsets.UTF_8);
+
         String redirectUrl = String.format(
-                "%s",
-                frontendRedirectUrl
+                "%s?%s=%s",
+                frontendRedirectUrl, "name", encodedName
         );
 
         log.info("Redirecting user to: {}", redirectUrl);

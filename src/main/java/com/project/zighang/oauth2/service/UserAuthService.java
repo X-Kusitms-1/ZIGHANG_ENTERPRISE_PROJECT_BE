@@ -32,12 +32,12 @@ public class UserAuthService {
 
         if (existingToken.isPresent() && tokenProvider.validateToken(existingToken.get().getAccessToken())) {
             TokenDto tokenDto = TokenDto.of(existingToken.get().getAccessToken(), existingToken.get().getRefreshToken());
-            return new TokenResult(tokenDto, loginResult.isNewUser());
+            return new TokenResult(tokenDto, loginResult.user().getName());
         }
 
         TokenDto newTokenDto = tokenProvider.createToken(user);
         upsertTokenEntity(newTokenDto, user);
-        return new TokenResult(newTokenDto, loginResult.isNewUser());
+        return new TokenResult(newTokenDto, loginResult.user().getName());
     }
 
     private LoginResult loginOrSignUp(KakaoUserInfoResponseDto userInfo) {
