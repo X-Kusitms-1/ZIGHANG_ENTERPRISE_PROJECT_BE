@@ -88,4 +88,9 @@ public class UserServiceImpl implements UserService {
 
         userOnboardingEntity.updateDailyRecommendPostCount(request.applyCount());
     }
+
+    @Override
+    public boolean isUserOnboarded(UserEntity loginUser) {
+        return userOnboardingRepository.existsByUserEntity(loginUser);
+    }
 }

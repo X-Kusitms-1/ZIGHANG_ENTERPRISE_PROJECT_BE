@@ -6,6 +6,7 @@ import com.project.zighang.global.exception.model.NotFoundException;
 import com.project.zighang.global.template.RspTemplate;
 import com.project.zighang.user.dto.PostUserOnboardingDto;
 import com.project.zighang.user.dto.PostUserTodayApplyCountDTO;
+import com.project.zighang.user.dto.UserStatusDto;
 import com.project.zighang.user.entity.UserEntity;
 import com.project.zighang.user.entity.UserDetailsImpl;
 import com.project.zighang.user.service.UserService;
@@ -44,6 +45,18 @@ public class UserController {
         userService.addUserOnboardingInfo(postUserOnboardingDto, loginUser);
         log.info("SUCCESS postUserOnboardingInfo for user: {}", loginUser.getId());
         return RspTemplate.success(Success.POST_USER_Onboarding_API_REQUEST_SUCCESS);
+    }
+
+    @GetMapping("/status")
+    @Operation(
+            summary = "사용자 온보딩 상태 정보 조회"
+    )
+    public RspTemplate<?> getUserStatus(
+            @AuthenticationPrincipal UserDetailsImpl userDetails
+    ) {
+        UserEntity loginUser = getUserEntityFromUserDetailsImpl(userDetails);
+        boolean isUserOnboarded = userService.isUserOnboarded(loginUser);
+        return RspTemplate.success(Success.GET_API_REQUEST_SUCCESS, new UserStatusDto(isUserOnboarded));
     }
 
     @PostMapping("/today-apply")
