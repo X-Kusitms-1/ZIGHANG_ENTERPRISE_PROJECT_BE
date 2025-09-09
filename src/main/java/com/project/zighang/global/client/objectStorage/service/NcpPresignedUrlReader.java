@@ -1,11 +1,12 @@
-package com.project.zighang.global.service;
+package com.project.zighang.global.client.objectStorage.service;
 
 import com.amazonaws.HttpMethod;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.Headers;
 import com.amazonaws.services.s3.model.CannedAccessControlList;
 import com.amazonaws.services.s3.model.GeneratePresignedUrlRequest;
-import com.project.zighang.global.dto.PreSignedUrlResponse;
+import com.project.zighang.global.client.objectStorage.PresignedUrlReader;
+import com.project.zighang.global.client.objectStorage.dto.PreSignedUrlResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -18,7 +19,7 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
-public class NcpPresignedUrlReader implements PresignedUrlReader{
+public class NcpPresignedUrlReader implements PresignedUrlReader {
 
     private final AmazonS3 ncpS3Client;
 

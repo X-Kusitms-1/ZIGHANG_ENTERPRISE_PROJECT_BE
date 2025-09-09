@@ -1,4 +1,4 @@
-package com.project.zighang.global.template;
+package com.project.zighang.global.exception.template;
 
 import com.project.zighang.global.exception.ApiResponseCode;
 import lombok.AccessLevel;

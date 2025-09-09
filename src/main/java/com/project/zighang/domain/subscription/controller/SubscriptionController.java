@@ -5,7 +5,7 @@ import com.project.zighang.domain.subscription.dto.SubscriptionResponse;
 import com.project.zighang.domain.subscription.entity.UserCompanySubscription;
 import com.project.zighang.domain.subscription.service.SubscriptionService;
 import com.project.zighang.global.exception.Success;
-import com.project.zighang.global.template.RspTemplate;
+import com.project.zighang.global.exception.template.RspTemplate;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;

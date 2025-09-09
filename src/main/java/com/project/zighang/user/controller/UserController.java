@@ -3,7 +3,7 @@ package com.project.zighang.user.controller;
 import com.project.zighang.global.exception.Error;
 import com.project.zighang.global.exception.Success;
 import com.project.zighang.global.exception.model.NotFoundException;
-import com.project.zighang.global.template.RspTemplate;
+import com.project.zighang.global.exception.template.RspTemplate;
 import com.project.zighang.user.dto.PostUserOnboardingDto;
 import com.project.zighang.user.dto.PostUserTodayApplyCountDTO;
 import com.project.zighang.user.dto.UserStatusDto;

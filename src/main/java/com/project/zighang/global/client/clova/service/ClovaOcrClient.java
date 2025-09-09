@@ -1,8 +1,8 @@
-package com.project.zighang.global.util;
+package com.project.zighang.global.client.clova.service;
 
 import com.project.zighang.global.config.ClovaOcrClientConfig;
-import com.project.zighang.global.dto.ClovaOcrRequest;
-import com.project.zighang.global.dto.ClovaOcrResponse;
+import com.project.zighang.global.client.clova.dto.ClovaOcrRequest;
+import com.project.zighang.global.client.clova.dto.ClovaOcrResponse;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.PostMapping;

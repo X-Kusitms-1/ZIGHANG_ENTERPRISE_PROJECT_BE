@@ -1,5 +1,6 @@
-package com.project.zighang.global.config.redis;
+package com.project.zighang.global.client.redis.service;
 
+import com.project.zighang.global.client.redis.RedisClient;
 import com.project.zighang.global.exception.model.BadRequestException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -11,7 +12,7 @@ import java.time.Duration;
 
 @Component
 @RequiredArgsConstructor
-public class RedisClient {
+public class RedisService implements RedisClient {
 
     private final RedisTemplate<String, Object> redisTemplate;
 

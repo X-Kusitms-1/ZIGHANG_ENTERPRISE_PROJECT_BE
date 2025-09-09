@@ -1,7 +1,7 @@
-package com.project.zighang.global.controller;
+package com.project.zighang.global.client.objectStorage.controller;
 
-import com.project.zighang.global.dto.PreSignedUrlResponse;
-import com.project.zighang.global.service.PresignedUrlReader;
+import com.project.zighang.global.client.objectStorage.dto.PreSignedUrlResponse;
+import com.project.zighang.global.client.objectStorage.PresignedUrlReader;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;

@@ -1,8 +1,8 @@
-package com.project.zighang.global.service;
+package com.project.zighang.global.client.clova.service;
 
-import com.project.zighang.global.dto.ClovaOcrRequest;
-import com.project.zighang.global.dto.ClovaOcrResponse;
-import com.project.zighang.global.util.ClovaOcrClient;
+import com.project.zighang.global.client.clova.OcrReader;
+import com.project.zighang.global.client.clova.dto.ClovaOcrRequest;
+import com.project.zighang.global.client.clova.dto.ClovaOcrResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

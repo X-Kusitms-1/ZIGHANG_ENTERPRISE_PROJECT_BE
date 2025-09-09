@@ -1,6 +1,6 @@
-package com.project.zighang.global.service;
+package com.project.zighang.global.client.clova;
 
-import com.project.zighang.global.dto.ClovaOcrResponse;
+import com.project.zighang.global.client.clova.dto.ClovaOcrResponse;
 
 public interface OcrReader {
     ClovaOcrResponse extractFromUrl(String imageUrl);

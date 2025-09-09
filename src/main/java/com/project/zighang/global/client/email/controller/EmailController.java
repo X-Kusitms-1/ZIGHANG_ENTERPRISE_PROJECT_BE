@@ -1,6 +1,6 @@
-package com.project.zighang.global.controller;
+package com.project.zighang.global.client.email.controller;
 
-import com.project.zighang.global.service.EmailSender;
+import com.project.zighang.global.client.email.EmailSender;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;

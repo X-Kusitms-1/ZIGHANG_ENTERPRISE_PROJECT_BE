@@ -1,4 +1,4 @@
-package com.project.zighang.global.service;
+package com.project.zighang.global.client.email;
 
 public interface EmailSender {
 

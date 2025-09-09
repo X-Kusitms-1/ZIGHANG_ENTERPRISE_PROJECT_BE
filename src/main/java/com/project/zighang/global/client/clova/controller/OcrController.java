@@ -1,7 +1,7 @@
-package com.project.zighang.global.controller;
+package com.project.zighang.global.client.clova.controller;
 
-import com.project.zighang.global.dto.ClovaOcrResponse;
-import com.project.zighang.global.service.OcrReader;
+import com.project.zighang.global.client.clova.dto.ClovaOcrResponse;
+import com.project.zighang.global.client.clova.OcrReader;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;

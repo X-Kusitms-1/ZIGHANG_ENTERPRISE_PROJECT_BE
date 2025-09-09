@@ -1,4 +1,4 @@
-package com.project.zighang.global.dto;
+package com.project.zighang.global.client.objectStorage.dto;
 
 import lombok.Builder;
 
