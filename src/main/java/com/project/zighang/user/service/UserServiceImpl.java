@@ -2,6 +2,8 @@ package com.project.zighang.user.service;
 
 import com.project.zighang.global.exception.model.BadRequestException;
 import com.project.zighang.global.exception.model.NotFoundException;
+import com.project.zighang.oauth2.dto.TokenDto;
+import com.project.zighang.oauth2.service.TokenProvider;
 import com.project.zighang.user.dto.PostUserOnboardingDto;
 import com.project.zighang.user.dto.PostUserTodayApplyCountDTO;
 import com.project.zighang.user.entity.AddressEntity;
@@ -19,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.project.zighang.global.exception.Error;
 
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -31,6 +34,9 @@ public class UserServiceImpl implements UserService {
     private final UserOnboardingRepository userOnboardingRepository;
     private final AddressRepository addressRepository;
     private final IndustryRepository industryRepository;
+    private final TokenProvider tokenProvider;
+
+    private final AtomicInteger dummyUserSocialIdCounter = new AtomicInteger(-1);
 
     @Override
     public void addUserOnboardingInfo(PostUserOnboardingDto request, UserEntity loginUser) {
@@ -92,5 +98,29 @@ public class UserServiceImpl implements UserService {
     @Override
     public boolean isUserOnboarded(UserEntity loginUser) {
         return userOnboardingRepository.existsByUserEntity(loginUser);
+    }
+
+    @Override
+    public TokenDto saveDummyUser() {
+        log.info("새로운 더미 사용자 생성 및 토큰 발급 시작");
+
+        UserEntity newDummyUser = createNewDummyUser();
+        TokenDto token = tokenProvider.createToken(newDummyUser);
+
+        log.info("생성된 AccessToken: {}", token.accessToken() + "...");
+        return token;
+    }
+
+    private UserEntity createNewDummyUser() {
+        long socialId = dummyUserSocialIdCounter.getAndDecrement();
+
+        UserEntity dummyUser = UserEntity.builder()
+                .email("dummy_" + Math.abs(socialId) + "@test.com")
+                .name("더미사용자_" + Math.abs(socialId))
+                .provider("dummy_user")
+                .socialId(socialId)
+                .build();
+
+        return userRepository.save(dummyUser);
     }
 }
