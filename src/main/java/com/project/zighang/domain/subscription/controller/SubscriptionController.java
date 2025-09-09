@@ -22,8 +22,8 @@ public class SubscriptionController {
 
     private final SubscriptionService subscriptionService;
 
-    @PostMapping
-    public RspTemplate<List<SubscriptionResponse>> register(@RequestParam Long companyId,
+    @PostMapping("/{companyId}")
+    public RspTemplate<List<SubscriptionResponse>> register(@PathVariable Long companyId,
                                                             @AuthenticationPrincipal UserDetailsImpl userDetails) {
         List<UserCompanySubscription> subscriptions = subscriptionService.register(userDetails.getId(), companyId);
 
@@ -34,8 +34,8 @@ public class SubscriptionController {
         return RspTemplate.success(Success.SUBSCRIBE_SUCCESS, subscriptionResponse);
     }
 
-    @DeleteMapping
-    public RspTemplate<List<SubscriptionResponse>> unregister(@RequestParam Long companyId,
+    @DeleteMapping("/{companyId}")
+    public RspTemplate<List<SubscriptionResponse>> unregister(@PathVariable Long companyId,
                                                               @AuthenticationPrincipal UserDetailsImpl userDetails) {
         List<UserCompanySubscription> subscriptions = subscriptionService.unregister(userDetails.getId(), companyId);
 
