@@ -1,4 +1,4 @@
-package com.project.zighang.global.redis;
+package com.project.zighang.global.config.redis;
 
 import com.project.zighang.global.exception.model.BadRequestException;
 import lombok.RequiredArgsConstructor;

@@ -1,4 +1,4 @@
-package com.project.zighang.global.config;
+package com.project.zighang.global.config.redis;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;

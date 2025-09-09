@@ -23,6 +23,7 @@ public enum Error implements ApiResponseCode {
     NOT_FOUND_USER(HttpStatus.NOT_FOUND, "존재하지 않는 사용자 정보입니다."),
     NOT_FOUND_USER_ONBOARDING(HttpStatus.NOT_FOUND, "존재하지 않는 사용자 온보딩 정보입니다."),
     NOT_FOUND_POST(HttpStatus.NOT_FOUND, "존재하지 않는 공고입니다."),
+    NOT_FOUND_PROMPT(HttpStatus.NOT_FOUND, "태그에 해당하는 프롬프트가 존재하지 않습니다."),
 
     /**
      * Redis Error
