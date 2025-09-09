@@ -20,6 +20,10 @@ public class UserDetailsImpl implements UserDetails {
         return Collections.emptyList();
     }
 
+    public Long getId() {
+        return userEntity.getId();
+    }
+
     @Override
     public String getPassword() {
         return null; // JWT 방식에서는 사용하지 않습니다.

@@ -30,7 +30,7 @@ public class UserController {
     @Operation(
             summary = "사용자 온보딩 정보 저장",
             description = "사용자의 온보딩 정보(경력, 관심지역 목록, 관심산업 목록)를 저장합니다. "
-+ "기존 저장 데이터가 있으면 모두 삭제 후 새로 받은 정보로 대체합니다."
+                            + "기존 저장 데이터가 있으면 모두 삭제 후 새로 받은 정보로 대체합니다."
     )
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "유저 온보딩 POST API 호출에 성공했습니다."),

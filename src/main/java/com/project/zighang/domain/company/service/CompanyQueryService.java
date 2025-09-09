@@ -35,6 +35,10 @@ public class CompanyQueryService {
             return List.of();
         }
 
+        Set<Long> subscribedCompanyIds = userId != null
+                ? Set.copyOf(subscriptionFinder.findSubscribedCompanyIds(userId))
+                : Set.of();
+
         // 회사별 최신 3개 뉴스만 SELECT
         List<CompanyNewsRepository.NewsSliceRow> rows = companyNewsRepository.findTopNewsByCompanyIds(companyIds, 3);
 
@@ -54,7 +58,7 @@ public class CompanyQueryService {
 
         return companies.stream()
                 .map(c -> new CompanyWithNewsResponse(
-                        toCompanyThumb(c),
+                        toCompanyThumb(c, subscribedCompanyIds.contains(c.getId())),
                         newsMap.getOrDefault(c.getId(), List.of())
                 ))
                 .toList();
@@ -65,7 +69,8 @@ public class CompanyQueryService {
             Set<CompanyType> types,
             Set<JobGroup> jobGroups,
             Set<String> regionCodes,
-            Pageable pageable
+            Pageable pageable,
+            Long userId
     ) {
         types       = normalize(types);
         jobGroups   = normalize(jobGroups);
@@ -78,6 +83,11 @@ public class CompanyQueryService {
 
         List<Company> companies = companyPage.getContent();
         List<Long> ids = companies.stream().map(Company::getId).toList();
+
+        // 회원인 경우에만 구독 회사 목록 조회, 비회원은 빈 Set
+        Set<Long> subscribedCompanyIds = userId != null
+                ? Set.copyOf(subscriptionFinder.findSubscribedCompanyIds(userId))
+                : Set.of();
 
         // 회사별 최신 3개 뉴스만 SELECT
         var rows = companyNewsRepository.findTopNewsByCompanyIds(ids, 3);
@@ -93,7 +103,7 @@ public class CompanyQueryService {
 
         List<CompanyWithNewsResponse> content = companies.stream()
                 .map(c -> new CompanyWithNewsResponse(
-                        toCompanyThumb(c),
+                        toCompanyThumb(c, subscribedCompanyIds.contains(c.getId())),
                         newsMap.getOrDefault(c.getId(), List.of())
                 ))
                 .toList();
@@ -102,12 +112,16 @@ public class CompanyQueryService {
     }
 
     /** 상세: 회사 전체 뉴스 + 같은 타입 랜덤 3사(각 3뉴스) */
-    public CompanyDetailWithSimilarResponse getDetailWithNewsAndSimilar(Long companyId) {
+    public CompanyDetailWithSimilarResponse getDetailWithNewsAndSimilar(Long companyId, Long userId) {
         Company company = companyRepository.findById(companyId)
                 .orElseThrow(() -> new NoSuchElementException("Company not found: " + companyId));
 
+        Set<Long> subscribedCompanyIds = userId != null
+                ? Set.copyOf(subscriptionFinder.findSubscribedCompanyIds(userId))
+                : Set.of();
+
         // 회사 요약
-        var companyDto = toCompanyThumb(company);
+        var companyDto = toCompanyThumb(company, subscribedCompanyIds.contains(companyId));
 
         // 전체 뉴스 (최신순)
         var newsEntities = companyNewsRepository.findAllByCompanyIdOrderByPublishedDesc(companyId);
@@ -140,7 +154,7 @@ public class CompanyQueryService {
 
                 similar = similars.stream()
                         .map(s -> new CompanyWithNewsResponse(
-                                toCompanyThumb(s),
+                                toCompanyThumb(s, subscribedCompanyIds.contains(s.getId())),
                                 newsMap.getOrDefault(s.getId(), List.of())
                         ))
                         .toList();
@@ -150,12 +164,13 @@ public class CompanyQueryService {
         return new CompanyDetailWithSimilarResponse(companyDto, newsAll, similar);
     }
 
-    private CompanyThumbnail toCompanyThumb(Company c) {
+    private CompanyThumbnail toCompanyThumb(Company c, boolean isSubscribed) {
         return new CompanyThumbnail(
                 c.getId(),
                 c.getCompanyNameKr(),
                 c.getCompanyThumbnailUrl(),
-                c.getCompanyType() != null ? c.getCompanyType().getDescription() : null
+                c.getCompanyType() != null ? c.getCompanyType().getDescription() : null,
+                isSubscribed
         );
     }
 

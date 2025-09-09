@@ -1,13 +1,13 @@
 package com.project.zighang.domain.subscription.controller;
 
-import com.project.zighang.domain.subscription.dto.SubscriptionRequest;
 import com.project.zighang.domain.subscription.dto.SubscriptionResponse;
 import com.project.zighang.domain.subscription.entity.UserCompanySubscription;
 import com.project.zighang.domain.subscription.service.SubscriptionService;
 import com.project.zighang.global.exception.Success;
 import com.project.zighang.global.exception.template.RspTemplate;
-import jakarta.validation.Valid;
+import com.project.zighang.user.entity.UserDetailsImpl;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -19,9 +19,10 @@ public class SubscriptionController {
 
     private final SubscriptionService subscriptionService;
 
-    @PostMapping
-    public RspTemplate<List<SubscriptionResponse>> register(@Valid @RequestBody SubscriptionRequest request) {
-        List<UserCompanySubscription> subscriptions = subscriptionService.register(request.userId(), request.companyId());
+    @PostMapping("/{companyId}")
+    public RspTemplate<List<SubscriptionResponse>> register(@PathVariable Long companyId,
+                                                            @AuthenticationPrincipal UserDetailsImpl userDetails) {
+        List<UserCompanySubscription> subscriptions = subscriptionService.register(userDetails.getId(), companyId);
 
         List<SubscriptionResponse> subscriptionResponse = subscriptions.stream()
                 .map(sub -> new SubscriptionResponse(sub.getId(), sub.getUserId(), sub.getCompanyId()))
@@ -30,9 +31,10 @@ public class SubscriptionController {
         return RspTemplate.success(Success.SUBSCRIBE_SUCCESS, subscriptionResponse);
     }
 
-    @DeleteMapping
-    public RspTemplate<List<SubscriptionResponse>> unregister(@Valid @RequestBody SubscriptionRequest request) {
-        List<UserCompanySubscription> subscriptions = subscriptionService.unregister(request.userId(), request.companyId());
+    @DeleteMapping("/{companyId}")
+    public RspTemplate<List<SubscriptionResponse>> unregister(@PathVariable Long companyId,
+                                                              @AuthenticationPrincipal UserDetailsImpl userDetails) {
+        List<UserCompanySubscription> subscriptions = subscriptionService.unregister(userDetails.getId(), companyId);
 
         List<SubscriptionResponse> subscriptionResponse = subscriptions.stream()
                 .map(sub -> new SubscriptionResponse(sub.getId(), sub.getUserId(), sub.getCompanyId()))
