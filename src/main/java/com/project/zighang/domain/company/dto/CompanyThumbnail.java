@@ -7,5 +7,7 @@ public record CompanyThumbnail(
 
         String companyThumbnailUrl,
 
-        String companyTypeLabel // enum description
+        String companyTypeLabel,
+
+        boolean isSubscribed
 ) {}
