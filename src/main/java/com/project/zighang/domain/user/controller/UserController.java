@@ -106,7 +106,7 @@ public class UserController {
 
     @Operation(summary = "주차별 레포트 조회 및 생성", description = "특정 년도, 월, 주차의 합격/불합격 공고를 분석한 레포트를 조회 및 분석합니다.")
     @ApiResponse(responseCode = "200", description = "분석 결과 반환", content = @Content(mediaType = "application/json"))
-    @GetMapping(value = "/weekly-report", produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/weekly-report", produces = MediaType.APPLICATION_JSON_VALUE)
     public RspTemplate<ReportResponse.Weekly> getWeeklyReport(
             @AuthenticationPrincipal UserDetailsImpl userDetails,
             @RequestBody ReportRequest.Weekly request) throws Exception {
