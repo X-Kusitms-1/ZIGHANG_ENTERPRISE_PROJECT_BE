@@ -1,7 +1,9 @@
 package com.project.zighang.oauth2.controller;
 
+import com.project.zighang.global.template.RspTemplate;
 import com.project.zighang.oauth2.dto.TokenResult;
 import com.project.zighang.oauth2.service.KakaoLoginService;
+import com.project.zighang.oauth2.service.TokenProvider;
 import feign.template.UriUtils;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.servlet.http.HttpServletResponse;
@@ -22,9 +24,10 @@ import java.nio.charset.StandardCharsets;
 @RestController
 @RequestMapping("/v1/auth/kakao")
 @RequiredArgsConstructor
-public class KakaoLoginController {
+public class LoginController {
 
     private final KakaoLoginService kakaoLoginService;
+    private final TokenProvider tokenProvider;
 
     @Value("${login.redirect-url.frontend}")
     private String frontendRedirectUrl;
@@ -66,8 +69,8 @@ public class KakaoLoginController {
     private ResponseCookie createCookie(String key, String value, int maxAge) {
         ResponseCookie.ResponseCookieBuilder builder = ResponseCookie.from(key, value)
                 .path("/")
-                .maxAge(maxAge);
-//                .httpOnly(true);
+                .maxAge(maxAge)
+                .httpOnly(true);
 
         builder.secure(true).sameSite("None");
         return builder.build();
