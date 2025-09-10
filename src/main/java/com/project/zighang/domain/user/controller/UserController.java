@@ -1,5 +1,6 @@
 package com.project.zighang.domain.user.controller;
 
+import com.project.zighang.domain.user.dto.request.ReportRequest;
 import com.project.zighang.global.exception.Error;
 import com.project.zighang.global.exception.Success;
 import com.project.zighang.global.exception.model.NotFoundException;
@@ -108,11 +109,13 @@ public class UserController {
     @GetMapping(value = "/weekly-report", produces = MediaType.APPLICATION_JSON_VALUE)
     public RspTemplate<ReportResponse.Weekly> getWeeklyReport(
             @AuthenticationPrincipal UserDetailsImpl userDetails,
-            @RequestParam(required = false) Integer year,
-            @RequestParam(required = false) Integer month,
-            @RequestParam(required = false) Integer weekOfMonth) throws Exception {
+            @RequestBody ReportRequest.Weekly request) throws Exception {
 
         LocalDate now = LocalDate.now();
+        Integer year = request.year();
+        Integer month = request.month();
+        Integer weekOfMonth = request.weekOfMonth();
+
         if (year == null) year = now.getYear();
         if (month == null) month = now.getMonthValue();
         if (weekOfMonth == null) {
