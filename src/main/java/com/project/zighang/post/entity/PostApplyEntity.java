@@ -1,6 +1,8 @@
 package com.project.zighang.post.entity;
 
+import com.project.zighang.domain.company.enumerate.CompanyType;
 import com.project.zighang.global.common.BaseEntity;
+import com.project.zighang.post.enumerate.ApplyStatus;
 import com.project.zighang.user.entity.UserEntity;
 import jakarta.persistence.*;
 import lombok.*;
@@ -26,10 +28,23 @@ public class PostApplyEntity extends BaseEntity {
     @JoinColumn(name = "recruitment_id")
     private PostEntity postEntity;
 
+    @Enumerated(EnumType.STRING)
+    @Column(length = 50)
+    private ApplyStatus applyStatus = ApplyStatus.PENDING;
+
     public static PostApplyEntity create(UserEntity userEntity, PostEntity postEntity) {
         return PostApplyEntity.builder()
                 .userEntity(userEntity)
                 .postEntity(postEntity)
                 .build();
+    }
+
+    // 합격 처리
+    public void pass() {
+        this.applyStatus = ApplyStatus.PASSED;
+    }
+
+    public void reject() {
+        this.applyStatus = ApplyStatus.REJECTED;
     }
 }

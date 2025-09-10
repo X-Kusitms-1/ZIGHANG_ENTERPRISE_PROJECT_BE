@@ -2,15 +2,26 @@ package com.project.zighang.global.prompt.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.project.zighang.global.client.Azure.dto.AnalysisRequest;
+import com.project.zighang.global.client.azure.dto.AnalysisRequest;
+import com.project.zighang.global.exception.Error;
+import com.project.zighang.global.exception.model.BadRequestException;
+import com.project.zighang.post.entity.PostApplyEntity;
+import com.project.zighang.post.enumerate.ApplyStatus;
+import com.project.zighang.post.service.PostingFinder;
+import com.project.zighang.user.entity.UserEntity;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class PromptBuilder {
+
     private final ObjectMapper objectMapper;
+    private final PostingFinder postingFinder;
 
     public String build(AnalysisRequest req) {
         try {
@@ -24,13 +35,26 @@ public class PromptBuilder {
 
                 [합격 공고 목록]
                 """ + passJson + """
-                [불합격 공고 목록] 
+                \n[불합격 공고 목록] 
                 """ + failJson + """
-                출력은 반드시 지정 JSON 스키마로만 반환해 주세요.
+                \n출력은 반드시 지정 JSON 스키마로만 반환해 주세요.
                 """;
 
         } catch (JsonProcessingException e) {
-            throw new IllegalArgumentException("Failed to build user prompt", e);
+            throw new BadRequestException(Error.PROMPT_BUILD_ERROR, e.getMessage());
+        }
+    }
+
+    public void buildReportRequest(UserEntity user) {
+        try {
+            List<PostApplyEntity> rejectedPosts = postingFinder.findPostingsByStatus(user, ApplyStatus.REJECTED);
+            List<PostApplyEntity> passedPosts = postingFinder.findPostingsByStatus(user, ApplyStatus.PASSED);
+
+            log.info(rejectedPosts.toString());
+            log.info(passedPosts.toString());
+
+        } catch (Exception e) {
+            throw new BadRequestException(Error.PROMPT_BUILD_ERROR, e.getMessage());
         }
     }
 }

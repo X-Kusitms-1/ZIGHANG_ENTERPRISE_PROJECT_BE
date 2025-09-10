@@ -1,5 +1,7 @@
 package com.project.zighang.user.controller;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.project.zighang.global.client.azure.dto.AnalysisRequest;
 import com.project.zighang.global.exception.Error;
 import com.project.zighang.global.exception.Success;
 import com.project.zighang.global.exception.model.NotFoundException;
@@ -11,10 +13,13 @@ import com.project.zighang.user.entity.UserEntity;
 import com.project.zighang.user.entity.UserDetailsImpl;
 import com.project.zighang.user.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.MediaType;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -81,4 +86,13 @@ public class UserController {
         }
         return userDetails.getUserEntity();
     }
+
+    @Operation(summary = "채용 공고 분석", description = "합격/불합격 채용 공고를 분석하여 사용자의 강약점을 도출합니다.")
+    @ApiResponse(responseCode = "200", description = "분석 결과 반환", content = @Content(mediaType = "application/json"))
+    @PostMapping(value = "/report", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public RspTemplate<JsonNode> analyze(@RequestBody @Valid AnalysisRequest analysisRequest) throws Exception {
+        JsonNode jsonNode = userService.generateUserReport(analysisRequest);
+        return RspTemplate.success(Success.CREATE_REPORT_SUCCESS, jsonNode);
+    }
+
 }

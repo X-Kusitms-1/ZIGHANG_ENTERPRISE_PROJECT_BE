@@ -43,7 +43,13 @@ public enum Error implements ApiResponseCode {
     /**
      * Azure OpenAI Error
      */
-    AZURE_API_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "Azure OpenAI API 요청 중 오류가 발생했습니다.");
+    AZURE_API_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "Azure OpenAI API 요청 중 오류가 발생했습니다."),
+    CONTENT_NOT_FOUND(HttpStatus.INTERNAL_SERVER_ERROR, "Azure OpenAI API 응답에서 content를 찾을 수 없습니다."),
+
+    /**
+     * Prompt Error
+     */
+    PROMPT_BUILD_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "프롬프트 생성 중 오류가 발생했습니다.");
 
     private final HttpStatus httpStatus;
     private final String message;

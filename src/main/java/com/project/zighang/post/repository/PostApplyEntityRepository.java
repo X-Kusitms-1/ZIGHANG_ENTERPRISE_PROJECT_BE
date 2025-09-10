@@ -2,6 +2,7 @@ package com.project.zighang.post.repository;
 
 import com.project.zighang.post.entity.PostApplyEntity;
 import com.project.zighang.post.entity.PostEntity;
+import com.project.zighang.post.enumerate.ApplyStatus;
 import com.project.zighang.user.entity.UserEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -17,4 +18,7 @@ public interface PostApplyEntityRepository extends JpaRepository<PostApplyEntity
 
     @Query("SELECT pa FROM PostApplyEntity pa JOIN FETCH pa.postEntity WHERE pa.userEntity = :user")
     List<PostApplyEntity> findAllByUserEntityWithPostFetch(@Param("user") UserEntity user);
+
+    @Query("SELECT pa FROM PostApplyEntity pa JOIN FETCH pa.postEntity WHERE pa.userEntity = :user AND pa.applyStatus = :status")
+    List<PostApplyEntity> findAllByUserEntityAndApplyStatusWithPostFetch(@Param("user") UserEntity user, @Param("status") ApplyStatus status);
 }

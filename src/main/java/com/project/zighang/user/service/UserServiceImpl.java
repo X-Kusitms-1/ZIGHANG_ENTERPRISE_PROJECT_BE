@@ -1,7 +1,14 @@
 package com.project.zighang.user.service;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.project.zighang.global.client.azure.ReportGenerator;
+import com.project.zighang.global.client.azure.dto.AnalysisRequest;
+import com.project.zighang.global.exception.Error;
 import com.project.zighang.global.exception.model.BadRequestException;
 import com.project.zighang.global.exception.model.NotFoundException;
+import com.project.zighang.global.prompt.service.PromptBuilder;
+import com.project.zighang.global.prompt.service.PromptFinder;
 import com.project.zighang.user.dto.PostUserOnboardingDto;
 import com.project.zighang.user.dto.PostUserTodayApplyCountDTO;
 import com.project.zighang.user.entity.AddressEntity;
@@ -11,12 +18,11 @@ import com.project.zighang.user.entity.UserOnboardingEntity;
 import com.project.zighang.user.repository.AddressRepository;
 import com.project.zighang.user.repository.IndustryRepository;
 import com.project.zighang.user.repository.UserOnboardingRepository;
-import com.project.zighang.user.repository.UserRepository;
+import io.swagger.v3.core.util.Json;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import com.project.zighang.global.exception.Error;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -27,10 +33,13 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
 
-    private final UserRepository userRepository;
     private final UserOnboardingRepository userOnboardingRepository;
     private final AddressRepository addressRepository;
     private final IndustryRepository industryRepository;
+    private final PromptFinder promptFinder;
+    private final PromptBuilder promptBuilder;
+    private final ReportGenerator reportGenerator;
+    private final ObjectMapper objectMapper;
 
     @Override
     public void addUserOnboardingInfo(PostUserOnboardingDto request, UserEntity loginUser) {
@@ -92,5 +101,23 @@ public class UserServiceImpl implements UserService {
     @Override
     public boolean isUserOnboarded(UserEntity loginUser) {
         return userOnboardingRepository.existsByUserEntity(loginUser);
+    }
+
+    // 1. 사용자 정보 기반으로 합격공고 조합, 실패 공고 조합
+    // 2. 시스템 프롬프트, 유저 프롬프트 찾기
+    // String systemPrompt = promptFinder.findPromptByTag("report");
+    // String userPrompt = promptBuilder.build(req);
+    // 3. openAI API 호출을 통해서 레포트 호출
+    // String raw = azureReportService.chatJsonOnly(systemPrompt, userPrompt)
+    // JsonNode jsonNode = objectMapper.readTree(raw);
+    // 4. 레포트 저장
+    // 5. 레포트 조회
+    public JsonNode generateUserReport(AnalysisRequest req) throws Exception {
+        String systemPrompt = promptFinder.findPromptByTag("report");
+        String userPrompt = promptBuilder.build(req);
+
+        String raw = reportGenerator.generateReport(systemPrompt, userPrompt);
+        JsonNode jsonNode = objectMapper.readTree(raw);
+        return jsonNode;
     }
 }

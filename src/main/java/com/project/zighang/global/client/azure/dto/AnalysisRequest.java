@@ -1,10 +1,9 @@
-package com.project.zighang.global.client.Azure.dto;
+package com.project.zighang.global.client.azure.dto;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import java.util.List;
 import java.util.Map;
-
 
 public record AnalysisRequest(
         @NotBlank String promptCode,
