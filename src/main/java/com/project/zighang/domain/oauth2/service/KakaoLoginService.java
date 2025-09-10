@@ -3,7 +3,6 @@ package com.project.zighang.domain.oauth2.service;
 import com.project.zighang.domain.oauth2.dto.KakaoTokenResponseDto;
 import com.project.zighang.domain.oauth2.dto.KakaoUserInfoResponseDto;
 import com.project.zighang.domain.oauth2.dto.TokenResult;
-import com.project.zighang.oauth2.dto.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.beans.factory.annotation.Value;
