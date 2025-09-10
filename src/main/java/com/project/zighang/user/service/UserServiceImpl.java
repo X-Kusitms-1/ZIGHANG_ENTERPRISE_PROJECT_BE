@@ -13,6 +13,7 @@ import com.project.zighang.oauth2.dto.TokenDto;
 import com.project.zighang.oauth2.service.TokenProvider;
 import com.project.zighang.user.dto.PostUserOnboardingDto;
 import com.project.zighang.user.dto.PostUserTodayApplyCountDTO;
+import com.project.zighang.user.dto.response.ReportResponse;
 import com.project.zighang.user.entity.AddressEntity;
 import com.project.zighang.user.entity.IndustryEntity;
 import com.project.zighang.user.entity.UserEntity;
@@ -119,16 +120,18 @@ public class UserServiceImpl implements UserService {
     // JsonNode jsonNode = objectMapper.readTree(raw);
     // 4. 레포트 저장
     // 5. 레포트 조회
-    public JsonNode generateUserReport(UserEntity user) throws Exception {
+    public ReportResponse.ReportDataDto generateUserReport(UserEntity user) throws Exception {
         String systemPrompt = promptFinder.findPromptByTag("report_new");
         String userPrompt = promptBuilder.buildReportRequest(user);
         log.info("요청 프롬프트 생성 완료");
         log.info("응답 생성 요청 중");
+
         String raw = reportGenerator.generateReport(systemPrompt, userPrompt);
         log.info("응답 생성 완료");
-        log.debug("Raw response: {}", raw);
+
         JsonNode jsonNode = objectMapper.readTree(raw);
-        return jsonNode;
+        log.info("json response: {}", jsonNode);
+        return objectMapper.treeToValue(jsonNode, ReportResponse.ReportDataDto.class);
     }
 
     @Override

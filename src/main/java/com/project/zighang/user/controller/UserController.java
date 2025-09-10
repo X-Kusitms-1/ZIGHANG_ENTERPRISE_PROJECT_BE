@@ -9,6 +9,7 @@ import com.project.zighang.oauth2.dto.TokenDto;
 import com.project.zighang.user.dto.PostUserOnboardingDto;
 import com.project.zighang.user.dto.PostUserTodayApplyCountDTO;
 import com.project.zighang.user.dto.UserStatusDto;
+import com.project.zighang.user.dto.response.ReportResponse;
 import com.project.zighang.user.entity.UserDetailsImpl;
 import com.project.zighang.user.entity.UserEntity;
 import com.project.zighang.user.service.UserService;
@@ -93,11 +94,11 @@ public class UserController {
         return RspTemplate.success(Success.GET_API_REQUEST_SUCCESS, token);
     }
 
-    @Operation(summary = "채용 공고 분석", description = "합격/불합격 채용 공고를 분석하여 사용자의 강약점을 도출합니다.")
+    @Operation(summary = "지원 현황 레포트 생성", description = "합격/불합격 채용 공고를 분석하여 사용자의 강약점을 도출합니다.")
     @ApiResponse(responseCode = "200", description = "분석 결과 반환", content = @Content(mediaType = "application/json"))
     @PostMapping(value = "/report", produces = MediaType.APPLICATION_JSON_VALUE)
-    public RspTemplate<JsonNode> analyze(@AuthenticationPrincipal UserDetailsImpl userDetails) throws Exception {
-        JsonNode jsonNode = userService.generateUserReport(userDetails.getUserEntity());
-        return RspTemplate.success(Success.CREATE_REPORT_SUCCESS, jsonNode);
+    public RspTemplate<ReportResponse.ReportDataDto> analyze(@AuthenticationPrincipal UserDetailsImpl userDetails) throws Exception {
+        ReportResponse.ReportDataDto reportData = userService.generateUserReport(userDetails.getUserEntity());
+        return RspTemplate.success(Success.CREATE_REPORT_SUCCESS, reportData);
     }
 }
