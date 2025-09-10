@@ -6,6 +6,7 @@ import com.project.zighang.global.exception.Error;
 import com.project.zighang.global.exception.Success;
 import com.project.zighang.global.exception.model.NotFoundException;
 import com.project.zighang.global.exception.template.RspTemplate;
+import com.project.zighang.oauth2.dto.TokenDto;
 import com.project.zighang.user.dto.PostUserOnboardingDto;
 import com.project.zighang.user.dto.PostUserTodayApplyCountDTO;
 import com.project.zighang.user.dto.UserStatusDto;
@@ -95,4 +96,11 @@ public class UserController {
         return RspTemplate.success(Success.CREATE_REPORT_SUCCESS, jsonNode);
     }
 
+
+    @GetMapping("/create-dummy-with-token")
+    @Operation(summary = "더미 유저의 jwt 토큰 발급", description = "항상 새로운 사용자가 생성되고 jwt 토큰이 발급됩니다.")
+    public RspTemplate<?> createDummyUserWithToken() {
+        TokenDto token = userService.saveDummyUser();
+        return RspTemplate.success(Success.GET_API_REQUEST_SUCCESS, token);
+    }
 }
