@@ -1,6 +1,5 @@
 package com.project.zighang.user.service;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.project.zighang.oauth2.dto.TokenDto;
 import com.project.zighang.user.dto.PostUserOnboardingDto;
 import com.project.zighang.user.dto.PostUserTodayApplyCountDTO;
@@ -17,4 +16,6 @@ public interface UserService {
     ReportResponse.ReportDataDto generateUserReport(UserEntity userEntity) throws Exception;
 
     TokenDto saveDummyUser();
+
+    ReportResponse.Weekly generateWeeklyReport(UserEntity userEntity, Integer year, Integer month, Integer weekOfMonth) throws Exception;
 }

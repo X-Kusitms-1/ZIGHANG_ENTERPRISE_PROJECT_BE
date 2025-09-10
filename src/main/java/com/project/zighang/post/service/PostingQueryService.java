@@ -9,6 +9,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -25,6 +28,21 @@ public class PostingQueryService implements PostingFinder {
                 .findAllByUserEntityAndApplyStatusWithPostFetch(user, status);
 
         return applies.stream()
+                .map(PostApplyEntity::getPostEntity)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<PostEntity> findPostingsByStatusAndDateRange(UserEntity user, ApplyStatus status, LocalDate startDate, LocalDate endDate) {
+        // LocalDate를 LocalDateTime으로 변환 (시작일은 00:00:00, 종료일은 23:59:59)
+        LocalDateTime startDateTime = startDate.atStartOfDay();
+        LocalDateTime endDateTime = endDate.atTime(LocalTime.MAX);
+
+        List<PostApplyEntity> postApplyEntities =
+                postApplyEntityRepository.findAllByUserEntityAndApplyStatusAndCreatedAtBetweenWithPostFetch(
+                        user, status, startDateTime, endDateTime);
+
+        return postApplyEntities.stream()
                 .map(PostApplyEntity::getPostEntity)
                 .collect(Collectors.toList());
     }

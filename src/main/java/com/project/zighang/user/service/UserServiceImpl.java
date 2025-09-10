@@ -3,7 +3,6 @@ package com.project.zighang.user.service;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.project.zighang.global.client.azure.ReportGenerator;
-import com.project.zighang.global.client.azure.dto.AnalysisRequest;
 import com.project.zighang.global.exception.Error;
 import com.project.zighang.global.exception.model.BadRequestException;
 import com.project.zighang.global.exception.model.NotFoundException;
@@ -11,24 +10,23 @@ import com.project.zighang.global.prompt.service.PromptBuilder;
 import com.project.zighang.global.prompt.service.PromptFinder;
 import com.project.zighang.oauth2.dto.TokenDto;
 import com.project.zighang.oauth2.service.TokenProvider;
+import com.project.zighang.post.entity.PostEntity;
+import com.project.zighang.post.enumerate.ApplyStatus;
+import com.project.zighang.post.service.PostingFinder;
 import com.project.zighang.user.dto.PostUserOnboardingDto;
 import com.project.zighang.user.dto.PostUserTodayApplyCountDTO;
+import com.project.zighang.user.dto.WeekDateInfo;
 import com.project.zighang.user.dto.response.ReportResponse;
-import com.project.zighang.user.entity.AddressEntity;
-import com.project.zighang.user.entity.IndustryEntity;
-import com.project.zighang.user.entity.UserEntity;
-import com.project.zighang.user.entity.UserOnboardingEntity;
-import com.project.zighang.user.repository.AddressRepository;
-import com.project.zighang.user.repository.IndustryRepository;
-import com.project.zighang.user.repository.UserOnboardingRepository;
-import com.project.zighang.user.repository.UserRepository;
+import com.project.zighang.user.entity.*;
+import com.project.zighang.user.repository.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.catalina.User;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
@@ -48,6 +46,8 @@ public class UserServiceImpl implements UserService {
     private final ReportGenerator reportGenerator;
     private final ObjectMapper objectMapper;
     private final UserRepository userRepository;
+    private final WeeklyReportRepository weeklyReportRepository;
+    private final PostingFinder postingFinder;
 
     @Override
     public void addUserOnboardingInfo(PostUserOnboardingDto request, UserEntity loginUser) {
@@ -111,15 +111,7 @@ public class UserServiceImpl implements UserService {
         return userOnboardingRepository.existsByUserEntity(loginUser);
     }
 
-    // 1. 사용자 정보 기반으로 합격공고 조합, 실패 공고 조합
-    // 2. 시스템 프롬프트, 유저 프롬프트 찾기
-    // String systemPrompt = promptFinder.findPromptByTag("report");
-    // String userPrompt = promptBuilder.build(req);
-    // 3. openAI API 호출을 통해서 레포트 호출
-    // String raw = azureReportService.chatJsonOnly(systemPrompt, userPrompt)
-    // JsonNode jsonNode = objectMapper.readTree(raw);
-    // 4. 레포트 저장
-    // 5. 레포트 조회
+    @Override
     public ReportResponse.ReportDataDto generateUserReport(UserEntity user) throws Exception {
         String systemPrompt = promptFinder.findPromptByTag("report_new");
         String userPrompt = promptBuilder.buildReportRequest(user);
@@ -156,5 +148,71 @@ public class UserServiceImpl implements UserService {
                 .build();
 
         return userRepository.save(dummyUser);
+    }
+
+    @Override
+    public ReportResponse.Weekly generateWeeklyReport(UserEntity user, Integer year, Integer month, Integer weekOfMonth) throws Exception {
+
+        Optional<WeeklyReport> existingReport = weeklyReportRepository.findByUserEntityAndYearAndMonthAndWeekOfMonth(user, year, month, weekOfMonth);
+        if (existingReport.isPresent()) {
+            WeeklyReport report = existingReport.get();
+            ReportResponse.ReportDataDto reportData = objectMapper.readValue(report.getReportData(), ReportResponse.ReportDataDto.class);
+            return ReportResponse.Weekly.from(report, reportData);
+        }
+
+        WeekDateInfo weekDateInfo = calculateWeekDates(year, month, weekOfMonth);
+
+        List<PostEntity> passedPosts = postingFinder.findPostingsByStatusAndDateRange(user, ApplyStatus.PASSED, weekDateInfo.startDate(), weekDateInfo.endDate());
+        List<PostEntity> rejectedPosts = postingFinder.findPostingsByStatusAndDateRange(user, ApplyStatus.REJECTED, weekDateInfo.startDate(), weekDateInfo.endDate());
+
+        if (passedPosts.isEmpty() && rejectedPosts.isEmpty()) {
+            throw new BadRequestException(Error.NO_DATA_AT_WEEKLY_REPORT, "해당 주차에 합격/불합격 데이터가 없습니다.");
+        }
+
+        String systemPrompt = promptFinder.findPromptByTag("report_new");
+        String userPrompt = promptBuilder.buildReportRequest(user);
+        String raw = reportGenerator.generateReport(systemPrompt, userPrompt);
+
+        JsonNode jsonNode = objectMapper.readTree(raw);
+        ReportResponse.ReportDataDto reportData = objectMapper.treeToValue(
+                jsonNode, ReportResponse.ReportDataDto.class);
+
+        String reportJson = objectMapper.writeValueAsString(reportData);
+        WeeklyReport weeklyReport = WeeklyReport.create(
+                user,
+                weekDateInfo.weekNumber(),
+                year,
+                month,
+                weekOfMonth,
+                reportJson,
+                passedPosts.size(),
+                rejectedPosts.size(),
+                weekDateInfo.startDate(),
+                weekDateInfo.endDate()
+        );
+
+        weeklyReportRepository.save(weeklyReport);
+
+        return ReportResponse.Weekly.from(weeklyReport, reportData);
+    }
+
+    private WeekDateInfo calculateWeekDates(Integer year, Integer month, Integer weekOfMonth) {
+
+        LocalDate firstDayOfMonth = LocalDate.of(year, month, 1);
+        int dayOfWeek = firstDayOfMonth.getDayOfWeek().getValue(); // 1(월)~7(일)
+
+        LocalDate startDate = firstDayOfMonth.plusDays((weekOfMonth - 1) * 7L - (dayOfWeek - 1));
+        if (startDate.getMonthValue() < month) {
+            startDate = firstDayOfMonth;
+        }
+
+        LocalDate endDate = startDate.plusDays(6);
+        if (endDate.getMonthValue() > month) {
+            endDate = firstDayOfMonth.plusMonths(1).minusDays(1);
+        }
+
+        int weekNumber = startDate.get(java.time.temporal.IsoFields.WEEK_OF_WEEK_BASED_YEAR);
+
+        return new WeekDateInfo(firstDayOfMonth, startDate, endDate, weekNumber);
     }
 }

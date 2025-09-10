@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Repository
@@ -21,4 +22,7 @@ public interface PostApplyEntityRepository extends JpaRepository<PostApplyEntity
 
     @Query("SELECT pa FROM PostApplyEntity pa JOIN FETCH pa.postEntity WHERE pa.userEntity = :user AND pa.applyStatus = :status")
     List<PostApplyEntity> findAllByUserEntityAndApplyStatusWithPostFetch(@Param("user") UserEntity user, @Param("status") ApplyStatus status);
+
+    @Query("SELECT pa FROM PostApplyEntity pa JOIN FETCH pa.postEntity WHERE pa.userEntity = :user AND pa.applyStatus = :status AND pa.createdAt BETWEEN :startDate AND :endDate")
+    List<PostApplyEntity> findAllByUserEntityAndApplyStatusAndCreatedAtBetweenWithPostFetch(@Param("user") UserEntity user, @Param("status") ApplyStatus status, @Param("startDate") LocalDateTime startDate, @Param("endDate") LocalDateTime endDate);
 }

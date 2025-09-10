@@ -16,6 +16,7 @@ public enum Error implements ApiResponseCode {
     BAD_REQUEST_APPLY_COUNT_VALUE(HttpStatus.BAD_REQUEST, "오늘의 공고 개수는 0개 이상이어야 합니다."),
     BAD_REQUEST_CAREER_VALUE(HttpStatus.BAD_REQUEST, "잘못된 커리어 데이터입니다."),
     BAD_REQUEST_ALREADY_APPLIED(HttpStatus.BAD_REQUEST, "이미 지원한 공고입니다."),
+    NO_DATA_AT_WEEKLY_REPORT(HttpStatus.BAD_REQUEST, "해당 주에 지원한 공고가 없어 주간 리포트를 생성할 수 없습니다."),
 
     /**
      * 404 NOT FOUND

@@ -1,6 +1,5 @@
 package com.project.zighang.user.controller;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.project.zighang.global.exception.Error;
 import com.project.zighang.global.exception.Success;
 import com.project.zighang.global.exception.model.NotFoundException;
@@ -22,6 +21,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+
+import java.time.LocalDate;
 
 @Slf4j
 @RestController
@@ -94,11 +95,35 @@ public class UserController {
         return RspTemplate.success(Success.GET_API_REQUEST_SUCCESS, token);
     }
 
-    @Operation(summary = "지원 현황 레포트 생성", description = "합격/불합격 채용 공고를 분석하여 사용자의 강약점을 도출합니다.")
+    @Operation(summary = "전체 지원 기반 레포트 생성", description = "합격/불합격 채용 공고 전체를 분석하여 사용자의 강약점을 도출합니다.")
     @ApiResponse(responseCode = "200", description = "분석 결과 반환", content = @Content(mediaType = "application/json"))
     @PostMapping(value = "/report", produces = MediaType.APPLICATION_JSON_VALUE)
     public RspTemplate<ReportResponse.ReportDataDto> analyze(@AuthenticationPrincipal UserDetailsImpl userDetails) throws Exception {
         ReportResponse.ReportDataDto reportData = userService.generateUserReport(userDetails.getUserEntity());
         return RspTemplate.success(Success.CREATE_REPORT_SUCCESS, reportData);
+    }
+
+    @Operation(summary = "주차별 레포트 조회 및 생성", description = "특정 년도, 월, 주차의 합격/불합격 공고를 분석한 레포트를 조회 및 분석합니다.")
+    @ApiResponse(responseCode = "200", description = "분석 결과 반환", content = @Content(mediaType = "application/json"))
+    @GetMapping(value = "/weekly-report", produces = MediaType.APPLICATION_JSON_VALUE)
+    public RspTemplate<ReportResponse.Weekly> getWeeklyReport(
+            @AuthenticationPrincipal UserDetailsImpl userDetails,
+            @RequestParam(required = false) Integer year,
+            @RequestParam(required = false) Integer month,
+            @RequestParam(required = false) Integer weekOfMonth) throws Exception {
+
+        LocalDate now = LocalDate.now();
+        if (year == null) year = now.getYear();
+        if (month == null) month = now.getMonthValue();
+        if (weekOfMonth == null) {
+            LocalDate firstDayOfMonth = LocalDate.of(year, month, 1);
+            int dayOfWeek = firstDayOfMonth.getDayOfWeek().getValue();
+            weekOfMonth = (now.getDayOfMonth() + dayOfWeek - 2) / 7 + 1;
+        }
+
+        UserEntity user = getUserEntityFromUserDetailsImpl(userDetails);
+        ReportResponse.Weekly report = userService.generateWeeklyReport(user, year, month, weekOfMonth);
+
+        return RspTemplate.success(Success.CREATE_REPORT_SUCCESS, report);
     }
 }
