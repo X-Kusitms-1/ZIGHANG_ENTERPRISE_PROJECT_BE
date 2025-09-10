@@ -8,6 +8,7 @@ import com.project.zighang.domain.company.repository.CompanyNewsRepository;
 import com.project.zighang.domain.company.repository.CompanyRepository;
 import com.project.zighang.domain.subscription.service.SubscriptionFinder;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.*;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -25,22 +27,31 @@ public class CompanyQueryService {
     private final SubscriptionFinder subscriptionFinder;
 
     public List<CompanyWithNewsResponse> getSubscribedCompaniesWithNews(Long userId) {
+        log.info("구독 회사 뉴스 조회 시작 - userId: {}", userId);
         List<Long> companyIds = subscriptionFinder.findSubscribedCompanyIds(userId);
+        log.debug("구독 회사 ID 조회 완료 - count: {}, companyIds: {}", companyIds.size(), companyIds);
+
         if (companyIds.isEmpty()) {
+            log.warn("구독한 회사가 없음 - userId: {}", userId);
             return List.of();
         }
 
         List<Company> companies = companyRepository.findAllById(companyIds);
+        log.debug("회사 정보 조회 완료 - found: {}, requested: {}", companies.size(), companyIds.size());
+
         if (companies.isEmpty()) {
+            log.warn("회사 정보를 찾을 수 없음 - userId: {}, companyIds: {}", userId, companyIds);
             return List.of();
         }
 
         Set<Long> subscribedCompanyIds = userId != null
                 ? Set.copyOf(subscriptionFinder.findSubscribedCompanyIds(userId))
                 : Set.of();
+        log.debug("구독 회사 ID Set 생성 완료 - count: {}", subscribedCompanyIds.size());
 
         // 회사별 최신 3개 뉴스만 SELECT
         List<CompanyNewsRepository.NewsSliceRow> rows = companyNewsRepository.findTopNewsByCompanyIds(companyIds, 3);
+        log.debug("회사 뉴스 조회 완료 - total news count: {}", rows.size());
 
         Map<Long, List<CompanyNews>> newsMap = rows.stream()
                 .collect(Collectors.groupingBy(
@@ -50,18 +61,23 @@ public class CompanyQueryService {
                                 r.getTitle(), r.getUrl(), r.getPublishedAt(), r.getThumbnailUrl()
                         ), Collectors.toList())
                 ));
+        log.debug("뉴스 데이터 그룹핑 완료 - companies with news: {}", newsMap.size());
 
         // 입력 순서(companyIds) 보존
         Map<Long, Integer> order = new HashMap<>();
         for (int i = 0; i < companyIds.size(); i++) order.put(companyIds.get(i), i);
         companies.sort(Comparator.comparingInt(c -> order.getOrDefault(c.getId(), Integer.MAX_VALUE)));
+        log.debug("회사 순서 정렬 완료");
 
-        return companies.stream()
+        List<CompanyWithNewsResponse> result = companies.stream()
                 .map(c -> new CompanyWithNewsResponse(
                         toCompanyThumb(c, subscribedCompanyIds.contains(c.getId())),
                         newsMap.getOrDefault(c.getId(), List.of())
                 ))
                 .toList();
+
+        log.info("구독 회사 뉴스 조회 완료 - userId: {}, result count: {}", userId, result.size());
+        return result;
     }
 
     /** 필터 유지 + 회사별 최신 뉴스 3개 */
