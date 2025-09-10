@@ -1,8 +1,16 @@
 package com.project.zighang.user.service;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.project.zighang.global.client.azure.ReportGenerator;
+import com.project.zighang.global.client.azure.dto.AnalysisRequest;
 import com.project.zighang.global.exception.Error;
 import com.project.zighang.global.exception.model.BadRequestException;
 import com.project.zighang.global.exception.model.NotFoundException;
+import com.project.zighang.global.prompt.service.PromptBuilder;
+import com.project.zighang.global.prompt.service.PromptFinder;
+import com.project.zighang.oauth2.dto.TokenDto;
+import com.project.zighang.oauth2.service.TokenProvider;
 import com.project.zighang.user.dto.PostUserOnboardingDto;
 import com.project.zighang.user.dto.PostUserTodayApplyCountDTO;
 import com.project.zighang.user.entity.AddressEntity;
@@ -12,12 +20,15 @@ import com.project.zighang.user.entity.UserOnboardingEntity;
 import com.project.zighang.user.repository.AddressRepository;
 import com.project.zighang.user.repository.IndustryRepository;
 import com.project.zighang.user.repository.UserOnboardingRepository;
+import com.project.zighang.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.catalina.User;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -30,12 +41,12 @@ public class UserServiceImpl implements UserService {
     private final AddressRepository addressRepository;
     private final IndustryRepository industryRepository;
     private final TokenProvider tokenProvider;
-
     private final AtomicInteger dummyUserSocialIdCounter = new AtomicInteger(-1);
     private final PromptFinder promptFinder;
     private final PromptBuilder promptBuilder;
     private final ReportGenerator reportGenerator;
     private final ObjectMapper objectMapper;
+    private final UserRepository userRepository;
 
     @Override
     public void addUserOnboardingInfo(PostUserOnboardingDto request, UserEntity loginUser) {
@@ -108,11 +119,14 @@ public class UserServiceImpl implements UserService {
     // JsonNode jsonNode = objectMapper.readTree(raw);
     // 4. 레포트 저장
     // 5. 레포트 조회
-    public JsonNode generateUserReport(AnalysisRequest req) throws Exception {
-        String systemPrompt = promptFinder.findPromptByTag("report");
-        String userPrompt = promptBuilder.build(req);
-
+    public JsonNode generateUserReport(UserEntity user) throws Exception {
+        String systemPrompt = promptFinder.findPromptByTag("report_new");
+        String userPrompt = promptBuilder.buildReportRequest(user);
+        log.info("요청 프롬프트 생성 완료");
+        log.info("응답 생성 요청 중");
         String raw = reportGenerator.generateReport(systemPrompt, userPrompt);
+        log.info("응답 생성 완료");
+        log.debug("Raw response: {}", raw);
         JsonNode jsonNode = objectMapper.readTree(raw);
         return jsonNode;
     }

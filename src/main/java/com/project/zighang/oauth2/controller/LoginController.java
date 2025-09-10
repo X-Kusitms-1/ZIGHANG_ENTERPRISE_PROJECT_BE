@@ -1,6 +1,5 @@
 package com.project.zighang.oauth2.controller;
 
-import com.project.zighang.global.template.RspTemplate;
 import com.project.zighang.oauth2.dto.TokenResult;
 import com.project.zighang.oauth2.service.KakaoLoginService;
 import com.project.zighang.oauth2.service.TokenProvider;

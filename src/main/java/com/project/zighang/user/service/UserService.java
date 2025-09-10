@@ -1,7 +1,6 @@
 package com.project.zighang.user.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.project.zighang.global.client.azure.dto.AnalysisRequest;
 import com.project.zighang.oauth2.dto.TokenDto;
 import com.project.zighang.user.dto.PostUserOnboardingDto;
 import com.project.zighang.user.dto.PostUserTodayApplyCountDTO;
@@ -14,7 +13,7 @@ public interface UserService {
 
     boolean isUserOnboarded(UserEntity loginUser);
 
-    JsonNode generateUserReport(AnalysisRequest req) throws Exception;
+    JsonNode generateUserReport(UserEntity user) throws Exception;
 
     TokenDto saveDummyUser();
 }

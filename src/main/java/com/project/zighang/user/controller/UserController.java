@@ -1,7 +1,6 @@
 package com.project.zighang.user.controller;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.project.zighang.global.client.azure.dto.AnalysisRequest;
 import com.project.zighang.global.exception.Error;
 import com.project.zighang.global.exception.Success;
 import com.project.zighang.global.exception.model.NotFoundException;
@@ -10,14 +9,13 @@ import com.project.zighang.oauth2.dto.TokenDto;
 import com.project.zighang.user.dto.PostUserOnboardingDto;
 import com.project.zighang.user.dto.PostUserTodayApplyCountDTO;
 import com.project.zighang.user.dto.UserStatusDto;
-import com.project.zighang.user.entity.UserEntity;
 import com.project.zighang.user.entity.UserDetailsImpl;
+import com.project.zighang.user.entity.UserEntity;
 import com.project.zighang.user.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
@@ -88,19 +86,18 @@ public class UserController {
         return userDetails.getUserEntity();
     }
 
-    @Operation(summary = "채용 공고 분석", description = "합격/불합격 채용 공고를 분석하여 사용자의 강약점을 도출합니다.")
-    @ApiResponse(responseCode = "200", description = "분석 결과 반환", content = @Content(mediaType = "application/json"))
-    @PostMapping(value = "/report", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public RspTemplate<JsonNode> analyze(@RequestBody @Valid AnalysisRequest analysisRequest) throws Exception {
-        JsonNode jsonNode = userService.generateUserReport(analysisRequest);
-        return RspTemplate.success(Success.CREATE_REPORT_SUCCESS, jsonNode);
-    }
-
-
     @GetMapping("/create-dummy-with-token")
     @Operation(summary = "더미 유저의 jwt 토큰 발급", description = "항상 새로운 사용자가 생성되고 jwt 토큰이 발급됩니다.")
     public RspTemplate<?> createDummyUserWithToken() {
         TokenDto token = userService.saveDummyUser();
         return RspTemplate.success(Success.GET_API_REQUEST_SUCCESS, token);
+    }
+
+    @Operation(summary = "채용 공고 분석", description = "합격/불합격 채용 공고를 분석하여 사용자의 강약점을 도출합니다.")
+    @ApiResponse(responseCode = "200", description = "분석 결과 반환", content = @Content(mediaType = "application/json"))
+    @PostMapping(value = "/report", produces = MediaType.APPLICATION_JSON_VALUE)
+    public RspTemplate<JsonNode> analyze(@AuthenticationPrincipal UserDetailsImpl userDetails) throws Exception {
+        JsonNode jsonNode = userService.generateUserReport(userDetails.getUserEntity());
+        return RspTemplate.success(Success.CREATE_REPORT_SUCCESS, jsonNode);
     }
 }

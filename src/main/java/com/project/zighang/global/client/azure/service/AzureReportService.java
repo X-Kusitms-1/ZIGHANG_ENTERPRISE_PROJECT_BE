@@ -47,7 +47,6 @@ public class AzureReportService implements ReportGenerator {
             JsonNode root = objectMapper.readTree(raw);
             JsonNode message = root.path("choices").path(0).path("message");
             String content = extractAssistantContent(message);
-            System.out.println(content);
 
             if (content == null || content.isBlank()) {
                 throw new AzureApiException(Error.CONTENT_NOT_FOUND, Error.CONTENT_NOT_FOUND.getMessage());
