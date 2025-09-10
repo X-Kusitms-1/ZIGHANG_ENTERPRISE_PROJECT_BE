@@ -6,13 +6,12 @@ import com.project.zighang.domain.company.enumerate.CompanyType;
 import com.project.zighang.domain.company.enumerate.JobGroup;
 import com.project.zighang.domain.company.service.CompanyQueryService;
 import com.project.zighang.global.exception.Success;
-import com.project.zighang.user.entity.UserDetailsImpl;
+import com.project.zighang.domain.user.entity.UserDetailsImpl;
 import io.swagger.v3.oas.annotations.Operation;
 import com.project.zighang.global.exception.template.RspTemplate;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.*;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Set;

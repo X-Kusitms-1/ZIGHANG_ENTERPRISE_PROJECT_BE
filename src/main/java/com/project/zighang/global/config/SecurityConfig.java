@@ -1,7 +1,7 @@
 package com.project.zighang.global.config;
 
-import com.project.zighang.oauth2.service.JwtAuthenticationFilter;
-import com.project.zighang.oauth2.service.TokenProvider;
+import com.project.zighang.domain.oauth2.service.JwtAuthenticationFilter;
+import com.project.zighang.domain.oauth2.service.TokenProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
