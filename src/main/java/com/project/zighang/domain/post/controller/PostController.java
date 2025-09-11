@@ -74,6 +74,15 @@ public class PostController {
         return RspTemplate.success(Success.GET_API_REQUEST_SUCCESS, userApplyHistory);
     }
 
+    @PostMapping("/resume")
+    @Operation(summary = "공고에 지원 할 때 제출한 이력서 파일 저장")
+    public RspTemplate<?> postResumeFile(
+            @AuthenticationPrincipal UserDetailsImpl userDetails
+    ) {
+        UserEntity loginUser = getUserEntityFromUserDetailsImpl(userDetails);
+
+    }
+
     private UserEntity getUserEntityFromUserDetailsImpl(UserDetailsImpl userDetails) throws RuntimeException {
         if (userDetails == null) {
             throw new NotFoundException(com.project.zighang.global.exception.Error.NOT_FOUND_USER, Error.NOT_FOUND_USER.getMessage());
