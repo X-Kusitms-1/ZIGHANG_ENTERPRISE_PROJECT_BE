@@ -1,6 +1,7 @@
 package com.project.zighang.domain.post.service;
 
 import com.project.zighang.domain.post.dto.*;
+import com.project.zighang.domain.post.enumerate.ApplyStatus;
 import com.project.zighang.domain.user.entity.UserEntity;
 import org.springframework.data.domain.Page;
 
@@ -20,4 +21,6 @@ public interface PostService {
     ApplyCountDto getUserApplyCount(UserEntity loginUser);
 
     void deleteApplyPost(DeleteApplyJobDto request, UserEntity loginUser);
+
+    void updateApplyStatus(PutPostApplyStatusDto request, UserEntity loginUser);
 }

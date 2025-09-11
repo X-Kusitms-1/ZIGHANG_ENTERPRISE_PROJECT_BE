@@ -93,6 +93,17 @@ public class PostController {
         return RspTemplate.success(Success.GET_API_REQUEST_SUCCESS, applyCountDto);
     }
 
+    @PutMapping("/apply-status")
+    @Operation(summary = "지난 지원 합격여부 수정", description = "지원한 공고의 합격여부는 (대기중, 합격, 불합격)으로 나뉩니다.")
+    public RspTemplate<?> updateApplyStatus(
+            @AuthenticationPrincipal UserDetailsImpl userDetails,
+            @RequestBody PutPostApplyStatusDto request
+    ) {
+        UserEntity loginUser = getUserEntityFromUserDetailsImpl(userDetails);
+        postService.updateApplyStatus(request, loginUser);
+        return RspTemplate.success(Success.PUT_APPLY_STATUS);
+    }
+
     private UserEntity getUserEntityFromUserDetailsImpl(UserDetailsImpl userDetails) throws RuntimeException {
         if (userDetails == null) {
             throw new NotFoundException(com.project.zighang.global.exception.Error.NOT_FOUND_USER, Error.NOT_FOUND_USER.getMessage());

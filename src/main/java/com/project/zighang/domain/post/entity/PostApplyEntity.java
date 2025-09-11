@@ -27,6 +27,7 @@ public class PostApplyEntity extends BaseEntity {
     @JoinColumn(name = "recruitment_id")
     private PostEntity postEntity;
 
+    @Setter
     @Enumerated(EnumType.STRING)
     @Column(length = 50)
     private ApplyStatus applyStatus = ApplyStatus.PENDING;

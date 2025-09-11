@@ -1,6 +1,7 @@
 package com.project.zighang.domain.post.service;
 
 import com.project.zighang.domain.post.dto.*;
+import com.project.zighang.domain.post.enumerate.ApplyStatus;
 import com.project.zighang.global.client.objectStorage.dto.PreSignedUrlResponse;
 import com.project.zighang.global.client.objectStorage.service.NcpPresignedUrlReader;
 import com.project.zighang.global.exception.Error;
@@ -110,6 +111,27 @@ public class PostServiceImpl implements PostService {
                 .orElseThrow(() -> new NotFoundException(Error.NOT_FOUND_APPLY, Error.NOT_FOUND_APPLY.getMessage()));
 
         postApplyEntityRepository.delete(applyEntity);
+    }
+
+    @Override
+    public void updateApplyStatus(PutPostApplyStatusDto request, UserEntity loginUser) {
+        ApplyStatus newStatus;
+        try {
+            newStatus = request.getApplyStatus();
+        } catch (IllegalArgumentException e) {
+            throw new BadRequestException(Error.BAD_REQUEST_APPLY_STATUS, Error.BAD_REQUEST_APPLY_STATUS.getMessage());
+        }
+
+        Long recruitmentId = request.recruitmentId();
+        PostEntity postEntity = postEntityRepository.findById(recruitmentId).orElseThrow(
+                () -> new NotFoundException(Error.NOT_FOUND_POST, Error.NOT_FOUND_POST.getMessage())
+        );
+
+        PostApplyEntity applyEntity = postApplyEntityRepository
+                .findPostApplyEntityByPostEntityAndUserEntity(postEntity, loginUser)
+                .orElseThrow(() -> new NotFoundException(Error.NOT_FOUND_APPLY, Error.NOT_FOUND_APPLY.getMessage()));
+
+        applyEntity.setApplyStatus(newStatus);
     }
 
     @Override
