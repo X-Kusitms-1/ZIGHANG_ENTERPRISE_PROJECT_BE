@@ -11,6 +11,7 @@ import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface PostApplyEntityRepository extends JpaRepository<PostApplyEntity, Long> {
@@ -43,4 +44,6 @@ public interface PostApplyEntityRepository extends JpaRepository<PostApplyEntity
                                   @Param("endOfWeek") LocalDateTime endOfWeek);
 
     Integer countByUserEntityId(Long userId);
+
+    Optional<PostApplyEntity> findPostApplyEntityByPostEntityAndUserEntity(PostEntity postEntity, UserEntity userEntity);
 }

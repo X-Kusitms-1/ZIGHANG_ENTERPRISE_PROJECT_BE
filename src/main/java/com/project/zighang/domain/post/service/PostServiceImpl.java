@@ -1,18 +1,14 @@
 package com.project.zighang.domain.post.service;
 
-import com.project.zighang.domain.post.dto.PostResumeRequestDto;
-import com.project.zighang.domain.post.dto.ResumeResponse;
-import com.project.zighang.domain.post.dto.ApplyCountDto;
+import com.project.zighang.domain.post.dto.*;
 import com.project.zighang.global.client.objectStorage.dto.PreSignedUrlResponse;
 import com.project.zighang.global.client.objectStorage.service.NcpPresignedUrlReader;
 import com.project.zighang.global.exception.Error;
 import com.project.zighang.global.exception.model.BadRequestException;
 import com.project.zighang.global.exception.model.NotFoundException;
-import com.project.zighang.domain.post.dto.PostApplyJobDto;
 import com.project.zighang.domain.post.entity.PostApplyEntity;
 import com.project.zighang.domain.post.repository.PostApplyEntityRepository;
 import com.project.zighang.domain.post.repository.PostEntityRepository;
-import com.project.zighang.domain.post.dto.PostResponseDto;
 import com.project.zighang.domain.post.entity.PostEntity;
 import com.project.zighang.domain.user.entity.UserEntity;
 import com.project.zighang.domain.user.entity.UserOnboardingEntity;
@@ -102,6 +98,19 @@ public class PostServiceImpl implements PostService {
         // need to work
 
         return null;
+    }
+
+    public void deleteApplyPost(DeleteApplyJobDto request, UserEntity loginUser) {
+        Long recruitmentId = request.recruitmentId();
+        PostEntity postEntity = postEntityRepository.findById(recruitmentId).orElseThrow(
+                () -> new NotFoundException(Error.NOT_FOUND_POST, Error.NOT_FOUND_POST.getMessage())
+        );
+
+        PostApplyEntity applyEntity = postApplyEntityRepository
+                .findPostApplyEntityByPostEntityAndUserEntity(postEntity, loginUser)
+                .orElseThrow(() -> new NotFoundException(Error.NOT_FOUND_APPLY, Error.NOT_FOUND_APPLY.getMessage()));
+
+        postApplyEntityRepository.delete(applyEntity);
     }
 
     @Override
