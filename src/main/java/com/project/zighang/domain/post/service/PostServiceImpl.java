@@ -67,11 +67,10 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public List<PostResponseDto> getAllUserApplyHistory(UserEntity loginUser) {
+    public List<ApplyPostResponseDto> getAllUserApplyHistory(UserEntity loginUser) {
         List<PostApplyEntity> postApplyEntityList = postApplyEntityRepository.findAllByUserEntityWithPostFetch(loginUser);
         return postApplyEntityList.stream()
-                .map(PostApplyEntity::getPostEntity)
-                .map(PostResponseDto::from)
+                .map(ApplyPostResponseDto::from)
                 .toList();
     }
 

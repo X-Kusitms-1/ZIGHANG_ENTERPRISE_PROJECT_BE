@@ -11,7 +11,7 @@ public interface PostService {
 
     List<PostResponseDto> getTodayApplyPostList(UserEntity loginUser);
 
-    List<PostResponseDto> getAllUserApplyHistory(UserEntity loginUser);
+    List<ApplyPostResponseDto> getAllUserApplyHistory(UserEntity loginUser);
 
     void applyJobPost(PostApplyJobDto request, UserEntity loginUser);
 

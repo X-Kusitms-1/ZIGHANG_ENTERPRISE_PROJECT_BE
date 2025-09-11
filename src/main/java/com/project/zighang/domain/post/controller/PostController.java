@@ -79,7 +79,7 @@ public class PostController {
             @AuthenticationPrincipal UserDetailsImpl userDetails
     ) {
         UserEntity loginUser = getUserEntityFromUserDetailsImpl(userDetails);
-        List<PostResponseDto> userApplyHistory = postService.getAllUserApplyHistory(loginUser);
+        List<ApplyPostResponseDto> userApplyHistory = postService.getAllUserApplyHistory(loginUser);
         return RspTemplate.success(Success.GET_API_REQUEST_SUCCESS, userApplyHistory);
     }
 
