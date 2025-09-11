@@ -94,7 +94,20 @@ public class PostController {
     }
 
     @PutMapping("/apply-status")
-    @Operation(summary = "지난 지원 합격여부 수정", description = "지원한 공고의 합격여부는 (대기중, 합격, 불합격)으로 나뉩니다.")
+    @Operation(
+            summary = "지원 상태 변경",
+            description = """
+        지원한 공고의 합격 여부를 변경합니다.
+        
+        **recruitmentId**
+        - 해당 공고의 recruitmentId
+        
+        **statusCode:**
+        - pending: 대기중 (심사 중)
+        - passed: 합격
+        - rejected: 불합격 (탈락)
+        """
+    )
     public RspTemplate<?> updateApplyStatus(
             @AuthenticationPrincipal UserDetailsImpl userDetails,
             @RequestBody PutPostApplyStatusDto request

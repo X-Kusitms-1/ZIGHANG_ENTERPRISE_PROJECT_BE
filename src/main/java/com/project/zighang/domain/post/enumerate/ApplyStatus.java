@@ -9,7 +9,7 @@ import java.util.Arrays;
 @RequiredArgsConstructor
 public enum ApplyStatus {
     PASSED("passed", "합격"),
-    PENDING("pending", "심사중"),
+    PENDING("pending", "대기중"),
     REJECTED("rejected", "탈락");
 
     private final String code;
@@ -19,9 +19,7 @@ public enum ApplyStatus {
         return Arrays.stream(values())
                 .filter(status -> status.code.equalsIgnoreCase(code))
                 .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException(
-                        String.format("Invalid status code: %s. Valid codes: %s",
-                                code, Arrays.toString(getAllCodes()))));
+                .orElseThrow(IllegalArgumentException::new);
     }
 
     private static String[] getAllCodes() {

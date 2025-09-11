@@ -115,12 +115,7 @@ public class PostServiceImpl implements PostService {
 
     @Override
     public void updateApplyStatus(PutPostApplyStatusDto request, UserEntity loginUser) {
-        ApplyStatus newStatus;
-        try {
-            newStatus = request.getApplyStatus();
-        } catch (IllegalArgumentException e) {
-            throw new BadRequestException(Error.BAD_REQUEST_APPLY_STATUS, Error.BAD_REQUEST_APPLY_STATUS.getMessage());
-        }
+        ApplyStatus newStatus = convertToApplyStatus(request.statusCode());
 
         Long recruitmentId = request.recruitmentId();
         PostEntity postEntity = postEntityRepository.findById(recruitmentId).orElseThrow(
@@ -132,6 +127,14 @@ public class PostServiceImpl implements PostService {
                 .orElseThrow(() -> new NotFoundException(Error.NOT_FOUND_APPLY, Error.NOT_FOUND_APPLY.getMessage()));
 
         applyEntity.setApplyStatus(newStatus);
+    }
+
+    private ApplyStatus convertToApplyStatus(String statusCode) {
+        try {
+            return ApplyStatus.fromCode(statusCode);
+        } catch (IllegalArgumentException e) {
+            throw new BadRequestException(Error.BAD_REQUEST_APPLY_STATUS, Error.BAD_REQUEST_APPLY_STATUS.getMessage());
+        }
     }
 
     @Override
