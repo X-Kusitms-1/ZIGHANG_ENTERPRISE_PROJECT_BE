@@ -50,7 +50,13 @@ public enum Error implements ApiResponseCode {
     /**
      * Prompt Error
      */
-    PROMPT_BUILD_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "프롬프트 생성 중 오류가 발생했습니다.");
+    PROMPT_BUILD_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "프롬프트 생성 중 오류가 발생했습니다."),
+
+    /**
+     * ACCURACY ERROR
+     */
+    ACCURACY_NOT_FOUND(HttpStatus.NOT_FOUND, "정확도 결과를 찾을 수 없습니다."),
+    ACCURACY_ALREADY_EXIST(HttpStatus.BAD_REQUEST, "이미 정확도 결과가 존재합니다.");
 
     private final HttpStatus httpStatus;
     private final String message;

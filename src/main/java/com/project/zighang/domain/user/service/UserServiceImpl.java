@@ -10,6 +10,7 @@ import com.project.zighang.domain.post.service.PostingFinder;
 import com.project.zighang.domain.user.dto.PostUserOnboardingDto;
 import com.project.zighang.domain.user.dto.PostUserTodayApplyCountDTO;
 import com.project.zighang.domain.user.dto.WeekDateInfo;
+import com.project.zighang.domain.user.dto.request.AccuracyRequest;
 import com.project.zighang.domain.user.dto.response.ReportResponse;
 import com.project.zighang.domain.user.entity.*;
 import com.project.zighang.domain.user.repository.*;
@@ -48,6 +49,7 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final WeeklyReportRepository weeklyReportRepository;
     private final PostingFinder postingFinder;
+    private final AccuracyRepository accuracyRepository;
 
     @Override
     public void addUserOnboardingInfo(PostUserOnboardingDto request, UserEntity loginUser) {
@@ -218,5 +220,29 @@ public class UserServiceImpl implements UserService {
         int weekNumber = startDate.get(java.time.temporal.IsoFields.WEEK_OF_WEEK_BASED_YEAR);
 
         return new WeekDateInfo(firstDayOfMonth, startDate, endDate, weekNumber);
+    }
+
+    @Override
+    public Accuracy createAccuracy(UserEntity userEntity, AccuracyRequest.answers answers) {
+        if (accuracyRepository.findByUserEntity(userEntity).isPresent()) {
+            throw new BadRequestException(Error.ACCURACY_ALREADY_EXIST, "이미 사용자의 데이터가 존재합니다.");
+        }
+
+        Accuracy accuracy = Accuracy.create(userEntity, answers);
+        return accuracyRepository.save(accuracy);
+    }
+
+    @Override
+    public Accuracy updateAccuracy(UserEntity userEntity, AccuracyRequest.answers answers) {
+        Accuracy accuracy = accuracyRepository.findByUserEntity(userEntity)
+                .orElseThrow(() -> new NotFoundException(Error.ACCURACY_NOT_FOUND, "사요자의 정확도 높이기 데이터를 찾을 수 없습니다."));
+        accuracy.update(answers);
+        return accuracy;
+    }
+
+    @Override
+    public Accuracy getAccuracy(UserEntity userEntity){
+        return accuracyRepository.findByUserEntity(userEntity)
+                .orElseThrow(() -> new NotFoundException(Error.ACCURACY_NOT_FOUND, "사용자의 정확도 높이기 데이터를 찾을 수 없습니다."));
     }
 }
