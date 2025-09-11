@@ -22,7 +22,7 @@ public class CompanyNews extends BaseEntity {
     @Column(length = 2000)
     private String url;
 
-        private LocalDate publishedAt;
+    private LocalDate publishedAt;
 
     @Column(length = 2000)
     private String thumbnailUrl;

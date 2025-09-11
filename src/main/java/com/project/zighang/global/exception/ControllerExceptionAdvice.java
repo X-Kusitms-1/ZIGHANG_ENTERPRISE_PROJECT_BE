@@ -1,7 +1,7 @@
 package com.project.zighang.global.exception;
 
 import com.project.zighang.global.exception.model.NotFoundException;
-import com.project.zighang.global.template.RspTemplate;
+import com.project.zighang.global.exception.template.RspTemplate;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;

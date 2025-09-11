@@ -16,6 +16,7 @@ public enum Error implements ApiResponseCode {
     BAD_REQUEST_APPLY_COUNT_VALUE(HttpStatus.BAD_REQUEST, "오늘의 공고 개수는 0개 이상이어야 합니다."),
     BAD_REQUEST_CAREER_VALUE(HttpStatus.BAD_REQUEST, "잘못된 커리어 데이터입니다."),
     BAD_REQUEST_ALREADY_APPLIED(HttpStatus.BAD_REQUEST, "이미 지원한 공고입니다."),
+    NO_DATA_AT_WEEKLY_REPORT(HttpStatus.BAD_REQUEST, "해당 주에 지원한 공고가 없어 주간 리포트를 생성할 수 없습니다."),
 
     /**
      * 404 NOT FOUND
@@ -23,6 +24,7 @@ public enum Error implements ApiResponseCode {
     NOT_FOUND_USER(HttpStatus.NOT_FOUND, "존재하지 않는 사용자 정보입니다."),
     NOT_FOUND_USER_ONBOARDING(HttpStatus.NOT_FOUND, "존재하지 않는 사용자 온보딩 정보입니다."),
     NOT_FOUND_POST(HttpStatus.NOT_FOUND, "존재하지 않는 공고입니다."),
+    NOT_FOUND_PROMPT(HttpStatus.NOT_FOUND, "태그에 해당하는 프롬프트가 존재하지 않습니다."),
 
     /**
      * Redis Error
@@ -37,7 +39,18 @@ public enum Error implements ApiResponseCode {
      * SubsctiptionError
      */
     ALREADY_SUBSCRIBED_COMPANY(HttpStatus.BAD_REQUEST, "이미 구독하고 있는 기업입니다."),
-    SUBSCRIPTION_INTERNAL_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "구독 중 오류가 발생하였습니다.");
+    SUBSCRIPTION_INTERNAL_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "구독 중 오류가 발생하였습니다."),
+
+    /**
+     * Azure OpenAI Error
+     */
+    AZURE_API_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "Azure OpenAI API 요청 중 오류가 발생했습니다."),
+    CONTENT_NOT_FOUND(HttpStatus.INTERNAL_SERVER_ERROR, "Azure OpenAI API 응답에서 content를 찾을 수 없습니다."),
+
+    /**
+     * Prompt Error
+     */
+    PROMPT_BUILD_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "프롬프트 생성 중 오류가 발생했습니다.");
 
     private final HttpStatus httpStatus;
     private final String message;

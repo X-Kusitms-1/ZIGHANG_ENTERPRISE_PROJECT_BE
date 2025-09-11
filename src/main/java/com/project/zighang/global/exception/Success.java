@@ -15,6 +15,7 @@ public enum Success implements ApiResponseCode {
     GET_API_REQUEST_SUCCESS(HttpStatus.OK, "Get API 호출에 성공했습니다."),
     UNSUBSCRIBE_SUCCESS(HttpStatus.OK, "정상적으로 구독이 취소됐습니다."),
     GET_SUBSCRIPTION_INFO_SUCCESS(HttpStatus.OK, "정상적으로 구독 정보를 불러왔습니다."),
+    CREATE_REPORT_SUCCESS(HttpStatus.OK, "정상적으로 레포트가 생성됐습니다."),
 
     /**
      * 201 CREATED
