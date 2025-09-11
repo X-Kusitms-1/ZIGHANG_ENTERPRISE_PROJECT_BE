@@ -9,15 +9,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Component;
 import java.security.Key;
-import java.util.Collections;
 import java.util.Date;
-import java.util.List;
 
 @Slf4j
 @Component
@@ -54,6 +50,8 @@ public class TokenProvider {
 
         // refreshToken에 대한 로직은 미구현 계획입니다.
         String refreshToken = Jwts.builder()
+                .setSubject(user.getId().toString())
+                .setIssuedAt(new Date(nowTime))
                 .setExpiration(refreshExpiredTime)
                 .signWith(key, SignatureAlgorithm.HS256)
                 .compact();
