@@ -1,5 +1,6 @@
 package com.project.zighang.domain.post.controller;
 
+import com.project.zighang.domain.post.dto.ApplyCountDto;
 import com.project.zighang.global.exception.Error;
 import com.project.zighang.global.exception.Success;
 import com.project.zighang.global.exception.model.NotFoundException;
@@ -74,13 +75,14 @@ public class PostController {
         return RspTemplate.success(Success.GET_API_REQUEST_SUCCESS, userApplyHistory);
     }
 
-    @PostMapping("/resume")
-    @Operation(summary = "공고에 지원 할 때 제출한 이력서 파일 저장")
-    public RspTemplate<?> postResumeFile(
+    @Operation(summary = "지원 개수 현황 확인" , description = "오늘 지원한 곳 개수, 이번 주 지원 개수, 누적 지원 개수를 반환합니다.")
+    @GetMapping(value = "/apply")
+    public RspTemplate<?> getApplyCount(
             @AuthenticationPrincipal UserDetailsImpl userDetails
     ) {
         UserEntity loginUser = getUserEntityFromUserDetailsImpl(userDetails);
-
+        ApplyCountDto applyCountDto = postService.getUserApplyCount(loginUser);
+        return RspTemplate.success(Success.GET_API_REQUEST_SUCCESS, applyCountDto);
     }
 
     private UserEntity getUserEntityFromUserDetailsImpl(UserDetailsImpl userDetails) throws RuntimeException {

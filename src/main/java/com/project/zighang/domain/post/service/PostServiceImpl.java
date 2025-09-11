@@ -2,6 +2,7 @@ package com.project.zighang.domain.post.service;
 
 import com.project.zighang.domain.post.dto.PostResumeRequestDto;
 import com.project.zighang.domain.post.dto.ResumeResponse;
+import com.project.zighang.domain.post.dto.ApplyCountDto;
 import com.project.zighang.global.client.objectStorage.dto.PreSignedUrlResponse;
 import com.project.zighang.global.client.objectStorage.service.NcpPresignedUrlReader;
 import com.project.zighang.global.exception.Error;
@@ -24,6 +25,9 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.DayOfWeek;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -95,7 +99,47 @@ public class PostServiceImpl implements PostService {
 
         PreSignedUrlResponse preSignedUrlResponse = presignedUrlReader.getPreSignedUrl(prefix, fileName);
 
+        // need to work
+
         return null;
+    }
+
+    @Override
+    public ApplyCountDto getUserApplyCount(UserEntity loginUser) {
+        Long userId = loginUser.getId();
+        return new ApplyCountDto(
+                getTodayApplyCount(userId),
+                getThisWeekApplyCount(userId),
+                getTotalApplyCount(userId)
+        );
+    }
+
+    private Integer getTotalApplyCount(Long userId) {
+        return postApplyEntityRepository.countByUserEntityId(userId);
+    }
+
+    private Integer getTodayApplyCount(Long userId) {
+        LocalDateTime[] todayRange = getTodayRange();
+        return postApplyEntityRepository.getTodayApplyCount(userId, todayRange[0], todayRange[1]);
+    }
+
+    private Integer getThisWeekApplyCount(Long userId) {
+        LocalDateTime[] weekRange = getThisWeekRange();
+        return postApplyEntityRepository.getThisWeekApplyCount(userId, weekRange[0], weekRange[1]);
+    }
+
+    private LocalDateTime[] getTodayRange() {
+        LocalDateTime startOfDay = LocalDate.now().atStartOfDay();
+        LocalDateTime endOfDay = startOfDay.plusDays(1);
+        return new LocalDateTime[]{startOfDay, endOfDay};
+    }
+
+    private LocalDateTime[] getThisWeekRange() {
+        LocalDateTime startOfWeek = LocalDate.now()
+                .with(DayOfWeek.MONDAY)
+                .atStartOfDay();
+        LocalDateTime endOfWeek = startOfWeek.plusWeeks(1);
+        return new LocalDateTime[]{startOfWeek, endOfWeek};
     }
 
     private Page<PostEntity> findPostsByViewCount(Pageable pageable) {

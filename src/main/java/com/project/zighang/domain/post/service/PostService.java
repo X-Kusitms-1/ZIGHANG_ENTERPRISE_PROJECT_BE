@@ -4,6 +4,7 @@ import com.project.zighang.domain.post.dto.PostApplyJobDto;
 import com.project.zighang.domain.post.dto.PostResponseDto;
 import com.project.zighang.domain.post.dto.PostResumeRequestDto;
 import com.project.zighang.domain.post.dto.ResumeResponse;
+import com.project.zighang.domain.post.dto.ApplyCountDto;
 import com.project.zighang.domain.user.entity.UserEntity;
 import org.springframework.data.domain.Page;
 
@@ -19,4 +20,6 @@ public interface PostService {
     void applyJobPost(PostApplyJobDto request, UserEntity loginUser);
 
     ResumeResponse postResumeFile(PostResumeRequestDto request, UserEntity loginUser);
+
+    ApplyCountDto getUserApplyCount(UserEntity loginUser);
 }
