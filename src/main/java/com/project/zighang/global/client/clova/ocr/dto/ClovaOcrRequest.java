@@ -1,4 +1,4 @@
-package com.project.zighang.global.client.clova.dto;
+package com.project.zighang.global.client.clova.ocr.dto;
 
 import java.util.List;
 import java.util.UUID;
