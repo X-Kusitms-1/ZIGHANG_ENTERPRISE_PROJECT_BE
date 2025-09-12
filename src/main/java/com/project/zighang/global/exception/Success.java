@@ -16,9 +16,10 @@ public enum Success implements ApiResponseCode {
     UNSUBSCRIBE_SUCCESS(HttpStatus.OK, "정상적으로 구독이 취소됐습니다."),
     GET_SUBSCRIPTION_INFO_SUCCESS(HttpStatus.OK, "정상적으로 구독 정보를 불러왔습니다."),
     CREATE_REPORT_SUCCESS(HttpStatus.OK, "정상적으로 레포트가 생성됐습니다."),
+    ACCURACY_RESULT_UPDATE_SUCCESS(HttpStatus.OK, "정상적으로 정확도 결과를 수정했습니다."),
+    ACCURACY_RESULT_QUERY_SUCCESS(HttpStatus.OK, "정상적으로 정확도 결과를 불러왔습니다."),
     DELETE_JOB_APPLY(HttpStatus.OK, "공고 지원이 정상적으로 취소되었습니다."),
     PUT_APPLY_STATUS(HttpStatus.OK, "공고 합격여부를 정상적으로 수정했습니다."),
-
     /**
      * 201 CREATED
      */
@@ -26,7 +27,7 @@ public enum Success implements ApiResponseCode {
     CREATE_JWT_TOKEN_SUCCESS(HttpStatus.CREATED, "소셜 로그인 성공 및 JWT 토큰 정상 발급했습니다."),
     SUBSCRIBE_SUCCESS(HttpStatus.CREATED, "정상적으로 구독됐습니다."),
     POST_JOB_APPLY(HttpStatus.CREATED, "정상적으로 공고에 지원했습니다."),
-
+    ACCURACY_RESULT_SAVE_SUCCESS(HttpStatus.CREATED, "정상적으로 정확도 결과가 저장됐습니다."),
     POST_USER_APPLY_COUNT_API_REQUEST_SUCCESS(HttpStatus.OK, "유저 하루 추천 공고 개수가 설정되었습니다.");
 
 

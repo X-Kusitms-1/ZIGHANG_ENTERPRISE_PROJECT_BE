@@ -16,8 +16,7 @@ public class UserOnboardingEntity extends BaseEntity {
     @JoinColumn(name = "user_entity_id")
     private UserEntity userEntity;
 
-    // 신입 -1, 경력은 +1 +2 .. 로 받을 예정
-    private Long minCareer;
+    private Long minCareer;  // 신입 -1, 경력은 +1 +2 .. 로 받을 예정
 
     private Long maxCareer;
 
