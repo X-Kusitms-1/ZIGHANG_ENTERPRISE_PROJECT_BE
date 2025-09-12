@@ -2,8 +2,6 @@ package com.project.zighang.domain.post.service;
 
 import com.project.zighang.domain.post.dto.*;
 import com.project.zighang.domain.post.enumerate.ApplyStatus;
-import com.project.zighang.global.client.objectStorage.dto.PreSignedUrlResponse;
-import com.project.zighang.global.client.objectStorage.service.NcpPresignedUrlReader;
 import com.project.zighang.global.exception.Error;
 import com.project.zighang.global.exception.model.BadRequestException;
 import com.project.zighang.global.exception.model.NotFoundException;
@@ -35,8 +33,6 @@ public class PostServiceImpl implements PostService {
     private final PostEntityRepository postEntityRepository;
     private final UserOnboardingRepository userOnboardingRepository;
     private final PostApplyEntityRepository postApplyEntityRepository;
-
-    private final NcpPresignedUrlReader presignedUrlReader;
 
     private static final int MAX_SIZE = 50;
 
@@ -89,17 +85,6 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public ResumeResponse postResumeFile(PostResumeRequestDto request, UserEntity loginUser) {
-        String prefix = request.prefix();
-        String fileName = request.fileName();
-
-        PreSignedUrlResponse preSignedUrlResponse = presignedUrlReader.getPreSignedUrl(prefix, fileName);
-
-        // need to work
-
-        return null;
-    }
-
     public void deleteApplyPost(DeleteApplyJobDto request, UserEntity loginUser) {
         Long recruitmentId = request.recruitmentId();
         PostEntity postEntity = postEntityRepository.findById(recruitmentId).orElseThrow(

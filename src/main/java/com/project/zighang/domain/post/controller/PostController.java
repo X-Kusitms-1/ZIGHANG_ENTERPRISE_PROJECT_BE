@@ -1,6 +1,8 @@
 package com.project.zighang.domain.post.controller;
 
 import com.project.zighang.domain.post.dto.*;
+import com.project.zighang.domain.post.service.ResumeFileService;
+import com.project.zighang.global.client.objectStorage.service.NcpPresignedUrlReader;
 import com.project.zighang.global.exception.Error;
 import com.project.zighang.global.exception.Success;
 import com.project.zighang.global.exception.model.NotFoundException;
@@ -11,7 +13,9 @@ import com.project.zighang.domain.user.entity.UserDetailsImpl;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.Parameters;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.apache.tomcat.util.http.fileupload.FileUploadException;
 import org.springframework.data.domain.Page;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -24,6 +28,7 @@ import java.util.List;
 public class PostController {
 
     private final PostService postService;
+    private final ResumeFileService resumeFileService;
 
     @GetMapping
     @Operation(summary = "공고 전체 목록 조회", description = "채용공고 목록을 페이지네이션하여 조회합니다. score 기반 내림차순 정렬입니다.")
@@ -115,6 +120,16 @@ public class PostController {
         UserEntity loginUser = getUserEntityFromUserDetailsImpl(userDetails);
         postService.updateApplyStatus(request, loginUser);
         return RspTemplate.success(Success.PUT_APPLY_STATUS);
+    }
+
+    @PostMapping("/resume/upload-complete")
+    public RspTemplate<?> completeUpload(
+            @AuthenticationPrincipal UserDetailsImpl userDetails,
+            @RequestBody @Valid UploadCompleteRequestDto request
+    ) throws FileUploadException {
+        UserEntity loginUser = getUserEntityFromUserDetailsImpl(userDetails);
+        ResumeFileResponseDto response = resumeFileService.completeUpload(request, loginUser);
+        return RspTemplate.success(Success.POST_RESUME, response);
     }
 
     private UserEntity getUserEntityFromUserDetailsImpl(UserDetailsImpl userDetails) throws RuntimeException {
