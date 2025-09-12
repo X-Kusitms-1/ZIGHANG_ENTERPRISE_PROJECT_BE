@@ -1,13 +1,15 @@
 package com.project.zighang.domain.post.service;
 
+import com.project.zighang.domain.post.dto.*;
+import com.project.zighang.domain.post.enumerate.ApplyStatus;
+import com.project.zighang.global.client.objectStorage.dto.PreSignedUrlResponse;
+import com.project.zighang.global.client.objectStorage.service.NcpPresignedUrlReader;
 import com.project.zighang.global.exception.Error;
 import com.project.zighang.global.exception.model.BadRequestException;
 import com.project.zighang.global.exception.model.NotFoundException;
-import com.project.zighang.domain.post.dto.PostApplyJobDto;
 import com.project.zighang.domain.post.entity.PostApplyEntity;
 import com.project.zighang.domain.post.repository.PostApplyEntityRepository;
 import com.project.zighang.domain.post.repository.PostEntityRepository;
-import com.project.zighang.domain.post.dto.PostResponseDto;
 import com.project.zighang.domain.post.entity.PostEntity;
 import com.project.zighang.domain.user.entity.UserEntity;
 import com.project.zighang.domain.user.entity.UserOnboardingEntity;
@@ -20,6 +22,9 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.DayOfWeek;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -30,6 +35,8 @@ public class PostServiceImpl implements PostService {
     private final PostEntityRepository postEntityRepository;
     private final UserOnboardingRepository userOnboardingRepository;
     private final PostApplyEntityRepository postApplyEntityRepository;
+
+    private final NcpPresignedUrlReader presignedUrlReader;
 
     private static final int MAX_SIZE = 50;
 
@@ -61,11 +68,10 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public List<PostResponseDto> getAllUserApplyHistory(UserEntity loginUser) {
+    public List<ApplyPostResponseDto> getAllUserApplyHistory(UserEntity loginUser) {
         List<PostApplyEntity> postApplyEntityList = postApplyEntityRepository.findAllByUserEntityWithPostFetch(loginUser);
         return postApplyEntityList.stream()
-                .map(PostApplyEntity::getPostEntity)
-                .map(PostResponseDto::from)
+                .map(ApplyPostResponseDto::from)
                 .toList();
     }
 
@@ -80,6 +86,93 @@ public class PostServiceImpl implements PostService {
         }
 
         postApplyEntityRepository.save(PostApplyEntity.create(loginUser, postEntity));
+    }
+
+    @Override
+    public ResumeResponse postResumeFile(PostResumeRequestDto request, UserEntity loginUser) {
+        String prefix = request.prefix();
+        String fileName = request.fileName();
+
+        PreSignedUrlResponse preSignedUrlResponse = presignedUrlReader.getPreSignedUrl(prefix, fileName);
+
+        // need to work
+
+        return null;
+    }
+
+    public void deleteApplyPost(DeleteApplyJobDto request, UserEntity loginUser) {
+        Long recruitmentId = request.recruitmentId();
+        PostEntity postEntity = postEntityRepository.findById(recruitmentId).orElseThrow(
+                () -> new NotFoundException(Error.NOT_FOUND_POST, Error.NOT_FOUND_POST.getMessage())
+        );
+
+        PostApplyEntity applyEntity = postApplyEntityRepository
+                .findPostApplyEntityByPostEntityAndUserEntity(postEntity, loginUser)
+                .orElseThrow(() -> new NotFoundException(Error.NOT_FOUND_APPLY, Error.NOT_FOUND_APPLY.getMessage()));
+
+        postApplyEntityRepository.delete(applyEntity);
+    }
+
+    @Override
+    public void updateApplyStatus(PutPostApplyStatusDto request, UserEntity loginUser) {
+        ApplyStatus newStatus = convertToApplyStatus(request.statusCode());
+
+        Long recruitmentId = request.recruitmentId();
+        PostEntity postEntity = postEntityRepository.findById(recruitmentId).orElseThrow(
+                () -> new NotFoundException(Error.NOT_FOUND_POST, Error.NOT_FOUND_POST.getMessage())
+        );
+
+        PostApplyEntity applyEntity = postApplyEntityRepository
+                .findPostApplyEntityByPostEntityAndUserEntity(postEntity, loginUser)
+                .orElseThrow(() -> new NotFoundException(Error.NOT_FOUND_APPLY, Error.NOT_FOUND_APPLY.getMessage()));
+
+        applyEntity.setApplyStatus(newStatus);
+    }
+
+    private ApplyStatus convertToApplyStatus(String statusCode) {
+        try {
+            return ApplyStatus.fromCode(statusCode);
+        } catch (IllegalArgumentException e) {
+            throw new BadRequestException(Error.BAD_REQUEST_APPLY_STATUS, Error.BAD_REQUEST_APPLY_STATUS.getMessage());
+        }
+    }
+
+    @Override
+    public ApplyCountDto getUserApplyCount(UserEntity loginUser) {
+        Long userId = loginUser.getId();
+        return new ApplyCountDto(
+                getTodayApplyCount(userId),
+                getThisWeekApplyCount(userId),
+                getTotalApplyCount(userId)
+        );
+    }
+
+    private Integer getTotalApplyCount(Long userId) {
+        return postApplyEntityRepository.countByUserEntityId(userId);
+    }
+
+    private Integer getTodayApplyCount(Long userId) {
+        LocalDateTime[] todayRange = getTodayRange();
+        return postApplyEntityRepository.getTodayApplyCount(userId, todayRange[0], todayRange[1]);
+    }
+
+    private Integer getThisWeekApplyCount(Long userId) {
+        LocalDateTime[] weekRange = getThisWeekRange();
+        return postApplyEntityRepository.getThisWeekApplyCount(userId, weekRange[0], weekRange[1]);
+    }
+
+    private LocalDateTime[] getTodayRange() {
+        LocalDateTime startOfDay = LocalDate.now().atStartOfDay();
+        LocalDateTime endOfDay = startOfDay.plusDays(1);
+        return new LocalDateTime[]{startOfDay, endOfDay};
+    }
+
+    private LocalDateTime[] getThisWeekRange() {
+        LocalDateTime startOfWeek = LocalDate.now()
+                .with(DayOfWeek.MONDAY)
+                .atStartOfDay();
+        LocalDateTime endOfWeek = startOfWeek.plusWeeks(1);
+        return new LocalDateTime[]{startOfWeek, endOfWeek};
     }
 
     private Page<PostEntity> findPostsByViewCount(Pageable pageable) {

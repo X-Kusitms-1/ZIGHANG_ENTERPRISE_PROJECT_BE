@@ -18,6 +18,8 @@ public enum Success implements ApiResponseCode {
     CREATE_REPORT_SUCCESS(HttpStatus.OK, "정상적으로 레포트가 생성됐습니다."),
     ACCURACY_RESULT_UPDATE_SUCCESS(HttpStatus.OK, "정상적으로 정확도 결과를 수정했습니다."),
     ACCURACY_RESULT_QUERY_SUCCESS(HttpStatus.OK, "정상적으로 정확도 결과를 불러왔습니다."),
+    DELETE_JOB_APPLY(HttpStatus.OK, "공고 지원이 정상적으로 취소되었습니다."),
+    PUT_APPLY_STATUS(HttpStatus.OK, "공고 합격여부를 정상적으로 수정했습니다."),
     /**
      * 201 CREATED
      */

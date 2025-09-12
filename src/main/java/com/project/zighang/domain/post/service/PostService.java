@@ -1,7 +1,7 @@
 package com.project.zighang.domain.post.service;
 
-import com.project.zighang.domain.post.dto.PostApplyJobDto;
-import com.project.zighang.domain.post.dto.PostResponseDto;
+import com.project.zighang.domain.post.dto.*;
+import com.project.zighang.domain.post.enumerate.ApplyStatus;
 import com.project.zighang.domain.user.entity.UserEntity;
 import org.springframework.data.domain.Page;
 
@@ -12,7 +12,15 @@ public interface PostService {
 
     List<PostResponseDto> getTodayApplyPostList(UserEntity loginUser);
 
-    List<PostResponseDto> getAllUserApplyHistory(UserEntity loginUser);
+    List<ApplyPostResponseDto> getAllUserApplyHistory(UserEntity loginUser);
 
     void applyJobPost(PostApplyJobDto request, UserEntity loginUser);
+
+    ResumeResponse postResumeFile(PostResumeRequestDto request, UserEntity loginUser);
+
+    ApplyCountDto getUserApplyCount(UserEntity loginUser);
+
+    void deleteApplyPost(DeleteApplyJobDto request, UserEntity loginUser);
+
+    void updateApplyStatus(PutPostApplyStatusDto request, UserEntity loginUser);
 }

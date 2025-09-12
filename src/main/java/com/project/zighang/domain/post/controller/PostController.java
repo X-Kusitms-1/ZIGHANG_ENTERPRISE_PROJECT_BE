@@ -1,12 +1,10 @@
 package com.project.zighang.domain.post.controller;
 
+import com.project.zighang.domain.post.dto.*;
 import com.project.zighang.global.exception.Error;
 import com.project.zighang.global.exception.Success;
 import com.project.zighang.global.exception.model.NotFoundException;
 import com.project.zighang.global.exception.template.RspTemplate;
-import com.project.zighang.domain.post.dto.PageDto;
-import com.project.zighang.domain.post.dto.PostApplyJobDto;
-import com.project.zighang.domain.post.dto.PostResponseDto;
 import com.project.zighang.domain.post.service.PostService;
 import com.project.zighang.domain.user.entity.UserEntity;
 import com.project.zighang.domain.user.entity.UserDetailsImpl;
@@ -54,7 +52,7 @@ public class PostController {
     }
 
     @PostMapping("/apply")
-    @Operation(summary = "공고 지원", description = "이미 지원한 공고는 다시 지원할 수 없습니다.")
+    @Operation(summary = "공고 지원 추가", description = "이미 지원한 공고는 다시 지원할 수 없습니다.")
     public RspTemplate<?> applyInJobPost(
             @AuthenticationPrincipal UserDetailsImpl userDetails,
             @RequestBody PostApplyJobDto request
@@ -64,14 +62,59 @@ public class PostController {
         return RspTemplate.success(Success.POST_JOB_APPLY);
     }
 
+    @DeleteMapping("/apply")
+    @Operation(summary = "공고 지원 삭제", description = "지원한 공고를 취소합니다.")
+    public RspTemplate<?> deleteJobApply(
+            @AuthenticationPrincipal UserDetailsImpl userDetails,
+            @RequestBody DeleteApplyJobDto request
+            ) {
+        UserEntity loginUser = getUserEntityFromUserDetailsImpl(userDetails);
+        postService.deleteApplyPost(request, loginUser);
+        return RspTemplate.success(Success.DELETE_JOB_APPLY);
+    }
+
     @GetMapping("/apply-history")
     @Operation(summary = "지난 지원 목록 조회")
     public RspTemplate<?> getUserApplyHistory(
             @AuthenticationPrincipal UserDetailsImpl userDetails
     ) {
         UserEntity loginUser = getUserEntityFromUserDetailsImpl(userDetails);
-        List<PostResponseDto> userApplyHistory = postService.getAllUserApplyHistory(loginUser);
+        List<ApplyPostResponseDto> userApplyHistory = postService.getAllUserApplyHistory(loginUser);
         return RspTemplate.success(Success.GET_API_REQUEST_SUCCESS, userApplyHistory);
+    }
+
+    @Operation(summary = "지원 개수 현황 확인" , description = "오늘 지원한 곳 개수, 이번 주 지원 개수, 누적 지원 개수를 반환합니다.")
+    @GetMapping(value = "/apply")
+    public RspTemplate<?> getApplyCount(
+            @AuthenticationPrincipal UserDetailsImpl userDetails
+    ) {
+        UserEntity loginUser = getUserEntityFromUserDetailsImpl(userDetails);
+        ApplyCountDto applyCountDto = postService.getUserApplyCount(loginUser);
+        return RspTemplate.success(Success.GET_API_REQUEST_SUCCESS, applyCountDto);
+    }
+
+    @PutMapping("/apply-status")
+    @Operation(
+            summary = "지원 상태 변경",
+            description = """
+        지원한 공고의 합격 여부를 변경합니다.
+        
+        **recruitmentId**
+        - 해당 공고의 recruitmentId
+        
+        **statusCode:**
+        - pending: 대기중 (심사 중)
+        - passed: 합격
+        - rejected: 불합격 (탈락)
+        """
+    )
+    public RspTemplate<?> updateApplyStatus(
+            @AuthenticationPrincipal UserDetailsImpl userDetails,
+            @RequestBody PutPostApplyStatusDto request
+    ) {
+        UserEntity loginUser = getUserEntityFromUserDetailsImpl(userDetails);
+        postService.updateApplyStatus(request, loginUser);
+        return RspTemplate.success(Success.PUT_APPLY_STATUS);
     }
 
     private UserEntity getUserEntityFromUserDetailsImpl(UserDetailsImpl userDetails) throws RuntimeException {

@@ -17,6 +17,7 @@ public enum Error implements ApiResponseCode {
     BAD_REQUEST_CAREER_VALUE(HttpStatus.BAD_REQUEST, "잘못된 커리어 데이터입니다."),
     BAD_REQUEST_ALREADY_APPLIED(HttpStatus.BAD_REQUEST, "이미 지원한 공고입니다."),
     NO_DATA_AT_WEEKLY_REPORT(HttpStatus.BAD_REQUEST, "해당 주에 지원한 공고가 없어 주간 리포트를 생성할 수 없습니다."),
+    BAD_REQUEST_APPLY_STATUS(HttpStatus.BAD_REQUEST, "statusCode는 passed, pending, rejected으로만 설정할 수 있습니다."),
 
     /**
      * 404 NOT FOUND
@@ -25,6 +26,7 @@ public enum Error implements ApiResponseCode {
     NOT_FOUND_USER_ONBOARDING(HttpStatus.NOT_FOUND, "존재하지 않는 사용자 온보딩 정보입니다."),
     NOT_FOUND_POST(HttpStatus.NOT_FOUND, "존재하지 않는 공고입니다."),
     NOT_FOUND_PROMPT(HttpStatus.NOT_FOUND, "태그에 해당하는 프롬프트가 존재하지 않습니다."),
+    NOT_FOUND_APPLY(HttpStatus.NOT_FOUND, "존재하지 않는 지원입니다."),
 
     /**
      * Redis Error
