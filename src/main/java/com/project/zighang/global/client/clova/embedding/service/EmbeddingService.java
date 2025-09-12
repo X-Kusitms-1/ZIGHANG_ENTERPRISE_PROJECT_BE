@@ -1,5 +1,7 @@
-package com.project.zighang.global.client.clova.embedding;
+package com.project.zighang.global.client.clova.embedding.service;
 
+import com.project.zighang.global.client.clova.embedding.EmbeddingGenerator;
+import com.project.zighang.global.client.clova.embedding.dto.EmbeddingDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -12,17 +14,18 @@ import java.util.UUID;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class EmbeddingService {
+public class EmbeddingService implements EmbeddingGenerator {
 
-    private final RestClient embeddingClient;
+    private final RestClient ncpEmbeddingClient;
 
     @Value("${cloud.ncp.embedding.endpoint}")
     private String embeddingEndpoint;
 
+    @Override
     public List<Double> embed(String text) {
         String requestId = UUID.randomUUID().toString().replace("-", "");
 
-        EmbeddingDto.EmbeddingV2Response res = embeddingClient.post()
+        EmbeddingDto.EmbeddingV2Response res = ncpEmbeddingClient.post()
                 .uri(embeddingEndpoint)
                 .header("X-NCP-CLOVASTUDIO-REQUEST-ID", requestId)
                 .body(new EmbeddingDto.EmbeddingV2Request(text))

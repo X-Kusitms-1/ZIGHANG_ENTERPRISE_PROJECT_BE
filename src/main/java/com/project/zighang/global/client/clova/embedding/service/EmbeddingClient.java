@@ -1,4 +1,4 @@
-package com.project.zighang.global.client.clova.embedding;
+package com.project.zighang.global.client.clova.embedding.service;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -8,7 +8,7 @@ import org.springframework.http.MediaType;
 import org.springframework.web.client.RestClient;
 
 @Configuration
-public class RestClientConfig {
+public class EmbeddingClient {
 
     @Value("${cloud.ncp.embedding.api-key}")
     private String apiKey;
@@ -17,7 +17,7 @@ public class RestClientConfig {
     private String baseUrl;
 
     @Bean
-    public RestClient embeddingClient(RestClient.Builder builder) {
+    public RestClient NcpEmbeddingClient(RestClient.Builder builder) {
         return builder
                 .baseUrl(baseUrl)
                 .defaultHeader(HttpHeaders.AUTHORIZATION, "Bearer " + apiKey)

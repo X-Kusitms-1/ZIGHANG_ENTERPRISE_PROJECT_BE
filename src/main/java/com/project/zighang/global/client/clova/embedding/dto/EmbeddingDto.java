@@ -1,4 +1,4 @@
-package com.project.zighang.global.client.clova.embedding;
+package com.project.zighang.global.client.clova.embedding.dto;
 
 import java.util.List;
 
@@ -10,7 +10,7 @@ public record EmbeddingDto () {
 
     public record EmbeddingV2Result(
             List<Double> embedding,
-            Integer numTokens
+            Integer inputTokens
     ) {}
 
     public record EmbeddingV2Response(
