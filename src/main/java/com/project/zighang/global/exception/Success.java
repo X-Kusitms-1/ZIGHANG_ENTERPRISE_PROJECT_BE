@@ -16,6 +16,8 @@ public enum Success implements ApiResponseCode {
     UNSUBSCRIBE_SUCCESS(HttpStatus.OK, "정상적으로 구독이 취소됐습니다."),
     GET_SUBSCRIPTION_INFO_SUCCESS(HttpStatus.OK, "정상적으로 구독 정보를 불러왔습니다."),
     CREATE_REPORT_SUCCESS(HttpStatus.OK, "정상적으로 레포트가 생성됐습니다."),
+    DELETE_JOB_APPLY(HttpStatus.OK, "공고 지원이 정상적으로 취소되었습니다."),
+    PUT_APPLY_STATUS(HttpStatus.OK, "공고 합격여부를 정상적으로 수정했습니다."),
 
     /**
      * 201 CREATED
