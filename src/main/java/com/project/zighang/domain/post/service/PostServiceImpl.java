@@ -2,6 +2,8 @@ package com.project.zighang.domain.post.service;
 
 import com.project.zighang.domain.post.dto.*;
 import com.project.zighang.domain.post.enumerate.ApplyStatus;
+import com.project.zighang.domain.user.entity.UserTodayPostEntity;
+import com.project.zighang.domain.user.repository.UserTodayPostRepository;
 import com.project.zighang.global.exception.Error;
 import com.project.zighang.global.exception.model.BadRequestException;
 import com.project.zighang.global.exception.model.NotFoundException;
@@ -13,6 +15,7 @@ import com.project.zighang.domain.user.entity.UserEntity;
 import com.project.zighang.domain.user.entity.UserOnboardingEntity;
 import com.project.zighang.domain.user.repository.UserOnboardingRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -24,7 +27,10 @@ import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @Transactional
 @RequiredArgsConstructor
@@ -33,6 +39,7 @@ public class PostServiceImpl implements PostService {
     private final PostEntityRepository postEntityRepository;
     private final UserOnboardingRepository userOnboardingRepository;
     private final PostApplyEntityRepository postApplyEntityRepository;
+    private final UserTodayPostRepository userTodayPostRepository;
 
     private static final int MAX_SIZE = 50;
 
@@ -52,8 +59,8 @@ public class PostServiceImpl implements PostService {
                         Error.NOT_FOUND_USER_ONBOARDING, Error.NOT_FOUND_USER_ONBOARDING.getMessage())
         );
 
-        Long applyPostCount = userOnboardingEntity.getDailyRecommendPostCount();
-        if (applyPostCount != null && applyPostCount >= 0) {
+        long applyPostCount = userOnboardingEntity.getDailyRecommendPostCount() + 5;
+        if (applyPostCount >= 0) {
             return findTopNPostsByViewCount(Math.toIntExact(applyPostCount))
                     .stream()
                     .map(PostResponseDto::from)
@@ -112,6 +119,49 @@ public class PostServiceImpl implements PostService {
                 .orElseThrow(() -> new NotFoundException(Error.NOT_FOUND_APPLY, Error.NOT_FOUND_APPLY.getMessage()));
 
         applyEntity.setApplyStatus(newStatus);
+    }
+
+    @Override
+    public void postUserTodayPosts(PostTodayApplyPostsRequest request, UserEntity loginUser) {
+        List<Long> recruitmentIds = request.getRecruitmentIdList();
+
+        validateInputs(recruitmentIds, loginUser);
+
+        List<PostEntity> posts = postEntityRepository.findAllById(recruitmentIds);
+
+        validateResults(posts, recruitmentIds);
+
+        List<UserTodayPostEntity> entities = posts.stream()
+                .map(post -> UserTodayPostEntity.create(loginUser, post))
+                .collect(Collectors.toList());
+
+        userTodayPostRepository.saveAll(entities);
+    }
+
+    private void validateInputs(List<Long> recruitmentIds, UserEntity loginUser) {
+        if (recruitmentIds == null || recruitmentIds.isEmpty()) {
+            throw new IllegalArgumentException("공고 ID 목록이 비어있습니다.");
+        }
+        if (recruitmentIds.contains(null)) {
+            throw new IllegalArgumentException("null인 공고 ID가 포함되어 있습니다.");
+        }
+        if (loginUser == null || loginUser.getId() == null) {
+            throw new IllegalArgumentException("로그인 사용자 정보가 없습니다.");
+        }
+    }
+
+    private void validateResults(List<PostEntity> posts, List<Long> recruitmentIds) {
+        if (posts.size() != recruitmentIds.size()) {
+            Set<Long> foundIds = posts.stream()
+                    .map(PostEntity::getRecruitmentId)
+                    .collect(Collectors.toSet());
+
+            List<Long> missingIds = recruitmentIds.stream()
+                    .filter(id -> !foundIds.contains(id))
+                    .toList();
+
+            throw new NotFoundException(Error.NOT_FOUND_POST, Error.NOT_FOUND_POST.getMessage());
+        }
     }
 
     private ApplyStatus convertToApplyStatus(String statusCode) {
