@@ -26,61 +26,51 @@ public class Accuracy extends BaseEntity {
     @ElementCollection(fetch = FetchType.LAZY)
     @CollectionTable(name = "accuracy_question1", joinColumns = @JoinColumn(name = "accuracy_id"))
     @Column(name = "answer")
-    @Builder.Default
     private Set<String> question1 = new HashSet<>();
 
     @ElementCollection(fetch = FetchType.LAZY)
     @CollectionTable(name = "accuracy_question2", joinColumns = @JoinColumn(name = "accuracy_id"))
     @Column(name = "answer")
-    @Builder.Default
     private Set<String> question2 = new HashSet<>();
 
     @ElementCollection(fetch = FetchType.LAZY)
     @CollectionTable(name = "accuracy_question3", joinColumns = @JoinColumn(name = "accuracy_id"))
     @Column(name = "answer")
-    @Builder.Default
     private Set<String> question3 = new HashSet<>();
 
     @ElementCollection(fetch = FetchType.LAZY)
     @CollectionTable(name = "accuracy_question4", joinColumns = @JoinColumn(name = "accuracy_id"))
     @Column(name = "answer")
-    @Builder.Default
     private Set<String> question4 = new HashSet<>();
 
     @ElementCollection(fetch = FetchType.LAZY)
     @CollectionTable(name = "accuracy_question5", joinColumns = @JoinColumn(name = "accuracy_id"))
     @Column(name = "answer")
-    @Builder.Default
     private Set<String> question5 = new HashSet<>();
 
     @ElementCollection(fetch = FetchType.LAZY)
     @CollectionTable(name = "accuracy_question6", joinColumns = @JoinColumn(name = "accuracy_id"))
     @Column(name = "answer")
-    @Builder.Default
     private Set<String> question6 = new HashSet<>();
 
     @ElementCollection(fetch = FetchType.LAZY)
     @CollectionTable(name = "accuracy_question7", joinColumns = @JoinColumn(name = "accuracy_id"))
     @Column(name = "answer")
-    @Builder.Default
     private Set<String> question7 = new HashSet<>();
 
     @ElementCollection(fetch = FetchType.LAZY)
     @CollectionTable(name = "accuracy_question8", joinColumns = @JoinColumn(name = "accuracy_id"))
     @Column(name = "answer")
-    @Builder.Default
     private Set<String> question8 = new HashSet<>();
 
     @ElementCollection(fetch = FetchType.LAZY)
     @CollectionTable(name = "accuracy_question9", joinColumns = @JoinColumn(name = "accuracy_id"))
     @Column(name = "answer")
-    @Builder.Default
     private Set<String> question9 = new HashSet<>();
 
     @ElementCollection(fetch = FetchType.LAZY)
     @CollectionTable(name = "accuracy_question10", joinColumns = @JoinColumn(name = "accuracy_id"))
     @Column(name = "answer")
-    @Builder.Default
     private Set<String> question10 = new HashSet<>();
 
 
