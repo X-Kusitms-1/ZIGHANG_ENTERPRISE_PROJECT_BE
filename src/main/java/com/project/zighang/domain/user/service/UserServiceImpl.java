@@ -177,6 +177,11 @@ public class UserServiceImpl implements UserService {
                 .collect(Collectors.toList());
     }
 
+    @Override
+    public void deleteUserTodayPosts(UserEntity loginUser) {
+        userTodayPostRepository.deleteByUserEntity(loginUser);
+    }
+
     private UserEntity createNewDummyUser() {
         long socialId = dummyUserSocialIdCounter.getAndDecrement();
 

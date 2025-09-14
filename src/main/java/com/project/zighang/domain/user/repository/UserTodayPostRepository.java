@@ -1,5 +1,6 @@
 package com.project.zighang.domain.user.repository;
 
+import com.project.zighang.domain.user.entity.UserEntity;
 import com.project.zighang.domain.user.entity.UserTodayPostEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -16,4 +17,6 @@ public interface UserTodayPostRepository extends JpaRepository<UserTodayPostEnti
             "WHERE utp.userEntity.id = :userId " +
             "ORDER BY utp.createdAt DESC")  // 최신 등록 순
     List<UserTodayPostEntity> findByUserEntityIdWithPost(@Param("userId") Long userId);
+
+    void deleteByUserEntity(UserEntity loginUser);
 }

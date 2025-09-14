@@ -94,6 +94,18 @@ public class UserController {
         return RspTemplate.success(Success.GET_API_REQUEST_SUCCESS, userServiceImpl.getUserTodayPosts(loginUser));
     }
 
+    @DeleteMapping("today-apply")
+    @Operation(
+            summary = "사용자 지정 오늘의 지원 리스트 모두 삭제"
+    )
+    public RspTemplate<?> deleteUserTodayApplyList(
+            @AuthenticationPrincipal UserDetailsImpl userDetails
+    ) {
+        UserEntity loginUser = getUserEntityFromUserDetailsImpl(userDetails);
+        userService.deleteUserTodayPosts(loginUser);
+        return RspTemplate.success(Success.DELETE_TODAY_APPLY);
+    }
+
     private UserEntity getUserEntityFromUserDetailsImpl(UserDetailsImpl userDetails) throws RuntimeException {
         if (userDetails == null) {
             log.warn("Authentication failed: UserDetailsImpl object is null.");

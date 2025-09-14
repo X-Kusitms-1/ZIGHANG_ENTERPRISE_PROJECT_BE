@@ -32,4 +32,6 @@ public interface UserService {
     Accuracy getAccuracy(UserEntity userEntity);
 
     List<TodayPostResponseDto> getUserTodayPosts(UserEntity loginUser);
+
+    void deleteUserTodayPosts(UserEntity loginUser);
 }
