@@ -285,6 +285,11 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public boolean checkWeeklyReportExists(UserEntity user, Integer year, Integer month, Integer weekOfMonth) {
+        return weeklyReportRepository.existsByUserEntityAndYearAndMonthAndWeekOfMonth(user, year, month, weekOfMonth);
+    }
+
+    @Override
     public Accuracy createAccuracy(UserEntity userEntity, AccuracyRequest.answers answers) {
         if (accuracyRepository.findByUserEntity(userEntity).isPresent()) {
             throw new BadRequestException(Error.ACCURACY_ALREADY_EXIST, "이미 사용자의 데이터가 존재합니다.");

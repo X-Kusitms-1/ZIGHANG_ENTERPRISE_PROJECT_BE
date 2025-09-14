@@ -143,9 +143,8 @@ public class UserController {
     @Operation(summary = "주차별 레포트 조회 및 생성", description = "특정 년도, 월, 주차의 합격/불합격 공고를 분석한 레포트를 조회 및 분석합니다.")
     @ApiResponse(responseCode = "200", description = "분석 결과 반환", content = @Content(mediaType = "application/json"))
     @PostMapping(value = "/weekly-report", produces = MediaType.APPLICATION_JSON_VALUE)
-    public RspTemplate<ReportResponse.Weekly> getWeeklyReport(
-            @AuthenticationPrincipal UserDetailsImpl userDetails,
-            @RequestBody ReportRequest.Weekly request) throws Exception {
+    public RspTemplate<ReportResponse.Weekly> getWeeklyReport(@AuthenticationPrincipal UserDetailsImpl userDetails,
+                                                              @RequestBody ReportRequest.Weekly request) throws Exception {
 
         LocalDate now = LocalDate.now();
         Integer year = request.year();
@@ -164,6 +163,27 @@ public class UserController {
         ReportResponse.Weekly report = userService.generateWeeklyReport(user, year, month, weekOfMonth);
 
         return RspTemplate.success(Success.CREATE_REPORT_SUCCESS, report);
+    }
+
+    @Operation(summary = "주차별 레포트 존재 여부 확인", description = "특정 년도, 월, 주차의 레포트 존재 여부를 확인합니다. 파라미터가 없으면 현재 날짜 기준으로 조회합니다.")
+    @ApiResponse(responseCode = "200", description = "레포트 존재 여부 반환")
+    @GetMapping("/weekly-report/exists")
+    public RspTemplate<Boolean> checkWeeklyReportExists(@AuthenticationPrincipal UserDetailsImpl userDetails,
+                                                        @RequestParam(required = false) Integer year,
+                                                        @RequestParam(required = false) Integer month,
+                                                        @RequestParam(required = false) Integer weekOfMonth) {
+        LocalDate now = LocalDate.now();
+        if (year == null) year = now.getYear();
+        if (month == null) month = now.getMonthValue();
+        if (weekOfMonth == null) {
+            LocalDate firstDayOfMonth = LocalDate.of(year, month, 1);
+            int dayOfWeek = firstDayOfMonth.getDayOfWeek().getValue();
+            weekOfMonth = (now.getDayOfMonth() + dayOfWeek - 2) / 7 + 1;
+        }
+
+        UserEntity user = getUserEntityFromUserDetailsImpl(userDetails);
+        boolean exists = userService.checkWeeklyReportExists(user, year, month, weekOfMonth);
+        return RspTemplate.success(Success.GET_API_REQUEST_SUCCESS, exists);
     }
 
     @GetMapping("/accuracy")
