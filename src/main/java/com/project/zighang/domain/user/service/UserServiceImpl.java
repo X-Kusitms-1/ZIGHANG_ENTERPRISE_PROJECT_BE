@@ -33,10 +33,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
@@ -160,8 +157,7 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional(readOnly = true)
     public List<TodayPostResponseDto> getUserTodayPosts(UserEntity loginUser) {
-        List<UserTodayPostEntity> entities = userTodayPostRepository
-                .findByUserEntityIdWithPost(loginUser.getId());
+        List<UserTodayPostEntity> entities = getUserTodayPostsSafely(loginUser.getId());
 
         List<Long> recruitmentIds = entities.stream()
                 .map(entity -> entity.getPostEntity().getRecruitmentId())
@@ -178,6 +174,17 @@ public class UserServiceImpl implements UserService {
         return posts.stream()
                 .map(post -> TodayPostResponseDto.from(post, applyStatusMap.get(post.getRecruitmentId())))
                 .collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
+    public List<UserTodayPostEntity> getUserTodayPostsSafely(Long userId) {
+        try {
+            List<UserTodayPostEntity> result = userTodayPostRepository.findByUserEntityIdWithPost(userId);
+            return result != null ? result : new ArrayList<>();
+        } catch (Exception e) {
+            log.warn("사용자 {}의 오늘 게시글 조회 실패: {}", userId, e.getMessage());
+            return new ArrayList<>();
+        }
     }
 
     @Override
