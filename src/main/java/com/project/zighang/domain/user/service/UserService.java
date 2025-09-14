@@ -5,6 +5,7 @@ import com.project.zighang.domain.post.dto.PostResponseDto;
 import com.project.zighang.domain.user.dto.PostUserOnboardingDto;
 import com.project.zighang.domain.user.dto.PostUserTodayApplyCountDTO;
 import com.project.zighang.domain.user.dto.request.AccuracyRequest;
+import com.project.zighang.domain.user.dto.response.AchievementResponse;
 import com.project.zighang.domain.user.dto.response.ReportResponse;
 import com.project.zighang.domain.user.dto.response.TodayPostResponseDto;
 import com.project.zighang.domain.user.entity.Accuracy;
@@ -32,4 +33,8 @@ public interface UserService {
     Accuracy getAccuracy(UserEntity userEntity);
 
     List<TodayPostResponseDto> getUserTodayPosts(UserEntity loginUser);
+
+    void deleteUserTodayPosts(UserEntity loginUser);
+
+    AchievementResponse getAchievementStatus(UserEntity loginUser);
 }

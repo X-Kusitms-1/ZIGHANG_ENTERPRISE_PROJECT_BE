@@ -20,6 +20,7 @@ public enum Success implements ApiResponseCode {
     ACCURACY_RESULT_QUERY_SUCCESS(HttpStatus.OK, "정상적으로 정확도 결과를 불러왔습니다."),
     DELETE_JOB_APPLY(HttpStatus.OK, "공고 지원이 정상적으로 취소되었습니다."),
     PUT_APPLY_STATUS(HttpStatus.OK, "공고 합격여부를 정상적으로 수정했습니다."),
+    DELETE_TODAY_APPLY(HttpStatus.OK, "오늘의 지원 리스트를 정상적으로 삭제했습니다."),
     /**
      * 201 CREATED
      */

@@ -14,6 +14,7 @@ import com.project.zighang.domain.user.dto.PostUserOnboardingDto;
 import com.project.zighang.domain.user.dto.PostUserTodayApplyCountDTO;
 import com.project.zighang.domain.user.dto.WeekDateInfo;
 import com.project.zighang.domain.user.dto.request.AccuracyRequest;
+import com.project.zighang.domain.user.dto.response.AchievementResponse;
 import com.project.zighang.domain.user.dto.response.ReportResponse;
 import com.project.zighang.domain.user.dto.response.TodayPostResponseDto;
 import com.project.zighang.domain.user.entity.*;
@@ -26,10 +27,12 @@ import com.project.zighang.global.prompt.service.PromptBuilder;
 import com.project.zighang.global.prompt.service.PromptFinder;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.aspectj.weaver.ast.Not;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -175,6 +178,33 @@ public class UserServiceImpl implements UserService {
         return posts.stream()
                 .map(post -> TodayPostResponseDto.from(post, applyStatusMap.get(post.getRecruitmentId())))
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public void deleteUserTodayPosts(UserEntity loginUser) {
+        userTodayPostRepository.deleteByUserEntity(loginUser);
+    }
+
+    @Override
+    public AchievementResponse getAchievementStatus(UserEntity loginUser) {
+        Long dailyRecommendPostCount = userOnboardingRepository.findByUserEntity(loginUser)
+                .orElseThrow(() -> new NotFoundException(Error.NOT_FOUND_USER_ONBOARDING, Error.NOT_FOUND_USER_ONBOARDING.getMessage()))
+                .getDailyRecommendPostCount();
+
+        Integer todayApplyCount = getTodayApplyCount(loginUser.getId());
+
+        return AchievementResponse.of(todayApplyCount, dailyRecommendPostCount);
+    }
+
+    private Integer getTodayApplyCount(Long userId) {
+        LocalDateTime[] todayRange = getTodayRange();
+        return postApplyEntityRepository.getTodayApplyCount(userId, todayRange[0], todayRange[1]);
+    }
+
+    private LocalDateTime[] getTodayRange() {
+        LocalDateTime startOfDay = LocalDate.now().atStartOfDay();
+        LocalDateTime endOfDay = startOfDay.plusDays(1);
+        return new LocalDateTime[]{startOfDay, endOfDay};
     }
 
     private UserEntity createNewDummyUser() {
