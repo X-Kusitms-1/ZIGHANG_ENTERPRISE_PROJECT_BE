@@ -20,6 +20,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,6 +28,8 @@ import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -41,7 +44,12 @@ public class PostServiceImpl implements PostService {
     private final PostApplyEntityRepository postApplyEntityRepository;
     private final UserTodayPostRepository userTodayPostRepository;
 
+    private final PostRecommendationService postRecommendationService;
+
     private static final int MAX_SIZE = 50;
+    private static final int REFRESH_ID_INCREMENT = 100;
+    private static final long MAX_RECRUITMENT_ID = 12000L;
+    private static final int ROLLBACK_DECREMENT = 200;
 
     @Override
     @Transactional(readOnly = true)
@@ -53,21 +61,70 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public List<PostResponseDto> getTodayApplyPostList(UserEntity loginUser) {
-        UserOnboardingEntity userOnboardingEntity = userOnboardingRepository.findByUserEntity(loginUser).orElseThrow(
-                () -> new NotFoundException(
-                        Error.NOT_FOUND_USER_ONBOARDING, Error.NOT_FOUND_USER_ONBOARDING.getMessage())
-        );
+    public List<TodayApplyPostsResponseDto> getTodayApplyPostList(GetTodayApplyPostsRequest request, UserEntity loginUser) {
+        long applyPostCount = 1;
+        if (request.isFirstApiCall()) {
+            // first time
+            UserOnboardingEntity userOnboardingEntity = userOnboardingRepository.findByUserEntity(loginUser).orElseThrow(
+                    () -> new NotFoundException(
+                            Error.NOT_FOUND_USER_ONBOARDING, Error.NOT_FOUND_USER_ONBOARDING.getMessage())
+            );
 
-        long applyPostCount = userOnboardingEntity.getDailyRecommendPostCount() + 5;
-        if (applyPostCount >= 0) {
-            return findTopNPostsByViewCount(Math.toIntExact(applyPostCount))
+            applyPostCount = userOnboardingEntity.getDailyRecommendPostCount() + 5;
+
+            // TASK - must switch findTopNPostsByViewCount to recommend module
+            List<TodayApplyPostsResponseDto> todayApplyPostsResponseDtoList = findTopNPostsByViewCount(Math.toIntExact(applyPostCount))
                     .stream()
-                    .map(PostResponseDto::from)
+                    .map(TodayApplyPostsResponseDto::from)
                     .toList();
+
+            postRecommendationService.deleteAndCreateUserRecommendations(loginUser.getId(), todayApplyPostsResponseDtoList);
+
+            return todayApplyPostsResponseDtoList;
+        } else {
+            // when user refresh post
+            List<TodayApplyPostsResponseDto> existingPosts = postRecommendationService.getRecommendations(loginUser.getId());
+
+            if (existingPosts.isEmpty()) {
+                log.warn("사용자 {}의 기존 메모리 데이터가 없습니다. 첫 번째 요청으로 처리", loginUser.getId());
+                return getTodayApplyPostList(new GetTodayApplyPostsRequest(true, loginUser.getId()), loginUser);
+            }
+
+            Long requiredRefreshRecruitmentId = request.requireRefreshRecruitmentId();
+            List<TodayApplyPostsResponseDto> updatedPosts = existingPosts.stream()
+                    .map(post -> {
+                        if (post.recruitmentId().equals(requiredRefreshRecruitmentId)) {
+                            return getReplacementPost(requiredRefreshRecruitmentId, post);
+                        }
+                        return post;
+                    })
+                    .toList();
+
+            postRecommendationService.deleteAndCreateUserRecommendations(loginUser.getId(), updatedPosts);
+
+            return updatedPosts;
+        }
+    }
+
+    private TodayApplyPostsResponseDto getReplacementPost(Long originalId, TodayApplyPostsResponseDto fallbackPost) {
+        Long newRecruitmentId = calculateNewRecruitmentId(originalId);
+
+        return postEntityRepository.findById(newRecruitmentId)
+                .map(TodayApplyPostsResponseDto::from)
+                .orElseGet(() -> {
+                    log.warn("대체 게시글 {}를 찾을 수 없음. 기존 게시글 유지", newRecruitmentId);
+                    return fallbackPost; // 새 게시글 없으면 기존 게시글 유지
+                });
+    }
+
+    private Long calculateNewRecruitmentId(Long originalId) {
+        long newId = originalId + REFRESH_ID_INCREMENT;
+
+        if (newId >= MAX_RECRUITMENT_ID) {
+            newId -= ROLLBACK_DECREMENT;
         }
 
-        return List.of();
+        return newId;
     }
 
     @Override
@@ -183,7 +240,7 @@ public class PostServiceImpl implements PostService {
     }
 
     private Integer getTotalApplyCount(Long userId) {
-        return postApplyEntityRepository.countByUserEntityId(userId);
+        return postApplyEntityRepository.countByUserEntityIdSafe(userId);
     }
 
     private Integer getTodayApplyCount(Long userId) {
