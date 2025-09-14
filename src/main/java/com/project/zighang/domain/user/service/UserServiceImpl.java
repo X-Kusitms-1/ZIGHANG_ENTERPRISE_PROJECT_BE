@@ -4,8 +4,10 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.project.zighang.domain.oauth2.dto.TokenDto;
 import com.project.zighang.domain.oauth2.service.TokenProvider;
+import com.project.zighang.domain.post.dto.PostResponseDto;
 import com.project.zighang.domain.post.entity.PostEntity;
 import com.project.zighang.domain.post.enumerate.ApplyStatus;
+import com.project.zighang.domain.post.repository.PostEntityRepository;
 import com.project.zighang.domain.post.service.PostingFinder;
 import com.project.zighang.domain.user.dto.PostUserOnboardingDto;
 import com.project.zighang.domain.user.dto.PostUserTodayApplyCountDTO;
@@ -50,6 +52,8 @@ public class UserServiceImpl implements UserService {
     private final WeeklyReportRepository weeklyReportRepository;
     private final PostingFinder postingFinder;
     private final AccuracyRepository accuracyRepository;
+    private final UserTodayPostRepository userTodayPostRepository;
+    private final PostEntityRepository postEntityRepository;
 
     @Override
     public void addUserOnboardingInfo(PostUserOnboardingDto request, UserEntity loginUser) {
@@ -143,6 +147,23 @@ public class UserServiceImpl implements UserService {
 
         log.info("생성된 AccessToken: {}", token.accessToken() + "...");
         return token;
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<PostResponseDto> getUserTodayPosts(UserEntity loginUser) {
+        List<UserTodayPostEntity> entities = userTodayPostRepository
+                .findByUserEntityIdWithPost(loginUser.getId());
+
+        List<Long> recruitmentIds = entities.stream()
+                .map(entity -> entity.getPostEntity().getRecruitmentId())
+                .toList();
+
+        List<PostEntity> posts = postEntityRepository.findAllById(recruitmentIds);
+
+        return posts.stream()
+                .map(PostResponseDto::from)
+                .collect(Collectors.toList());
     }
 
     private UserEntity createNewDummyUser() {

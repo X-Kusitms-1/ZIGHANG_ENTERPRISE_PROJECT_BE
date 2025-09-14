@@ -1,12 +1,15 @@
 package com.project.zighang.domain.user.service;
 
 import com.project.zighang.domain.oauth2.dto.TokenDto;
+import com.project.zighang.domain.post.dto.PostResponseDto;
 import com.project.zighang.domain.user.dto.PostUserOnboardingDto;
 import com.project.zighang.domain.user.dto.PostUserTodayApplyCountDTO;
 import com.project.zighang.domain.user.dto.request.AccuracyRequest;
 import com.project.zighang.domain.user.dto.response.ReportResponse;
 import com.project.zighang.domain.user.entity.Accuracy;
 import com.project.zighang.domain.user.entity.UserEntity;
+
+import java.util.List;
 
 public interface UserService {
     void addUserOnboardingInfo(PostUserOnboardingDto request, UserEntity loginUser);
@@ -26,4 +29,6 @@ public interface UserService {
     Accuracy updateAccuracy(UserEntity userEntity, AccuracyRequest.answers answers);
 
     Accuracy getAccuracy(UserEntity userEntity);
+
+    List<PostResponseDto> getUserTodayPosts(UserEntity loginUser);
 }
