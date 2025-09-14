@@ -26,6 +26,8 @@ public interface UserService {
 
     ReportResponse.Weekly generateWeeklyReport(UserEntity userEntity, Integer year, Integer month, Integer weekOfMonth) throws Exception;
 
+    boolean checkWeeklyReportExists(UserEntity userEntity, Integer year, Integer month, Integer weekOfMonth);
+
     Accuracy createAccuracy(UserEntity userEntity, AccuracyRequest.answers answers);
 
     Accuracy updateAccuracy(UserEntity userEntity, AccuracyRequest.answers answers);

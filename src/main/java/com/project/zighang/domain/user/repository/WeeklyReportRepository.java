@@ -11,4 +11,7 @@ import java.util.Optional;
 public interface WeeklyReportRepository extends JpaRepository<WeeklyReport, Long> {
     Optional<WeeklyReport> findByUserEntityAndYearAndMonthAndWeekOfMonth(
             UserEntity userEntity, Integer year, Integer month, Integer weekOfMonth);
+
+    boolean existsByUserEntityAndYearAndMonthAndWeekOfMonth(
+            UserEntity userEntity, Integer year, Integer month, Integer weekOfMonth);
 }
