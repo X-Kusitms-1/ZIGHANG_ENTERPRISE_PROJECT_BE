@@ -10,7 +10,7 @@ import java.util.List;
 public interface PostService {
     Page<PostResponseDto> getAllPostList(int page, int size);
 
-    List<PostResponseDto> getTodayApplyPostList(UserEntity loginUser);
+    List<TodayApplyPostsResponseDto> getTodayApplyPostList(UserEntity loginUser);
 
     List<ApplyPostResponseDto> getAllUserApplyHistory(UserEntity loginUser);
 

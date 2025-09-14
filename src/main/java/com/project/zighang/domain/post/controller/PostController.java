@@ -52,7 +52,7 @@ public class PostController {
             @AuthenticationPrincipal UserDetailsImpl userDetails
     ) {
         UserEntity loginUser = getUserEntityFromUserDetailsImpl(userDetails);
-        List<PostResponseDto> todayApplyPosts = postService.getTodayApplyPostList(loginUser);
+        List<TodayApplyPostsResponseDto> todayApplyPosts = postService.getTodayApplyPostList(loginUser);
         return RspTemplate.success(Success.GET_API_REQUEST_SUCCESS, todayApplyPosts);
     }
 

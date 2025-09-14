@@ -53,7 +53,7 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public List<PostResponseDto> getTodayApplyPostList(UserEntity loginUser) {
+    public List<TodayApplyPostsResponseDto> getTodayApplyPostList(UserEntity loginUser) {
         UserOnboardingEntity userOnboardingEntity = userOnboardingRepository.findByUserEntity(loginUser).orElseThrow(
                 () -> new NotFoundException(
                         Error.NOT_FOUND_USER_ONBOARDING, Error.NOT_FOUND_USER_ONBOARDING.getMessage())
@@ -63,7 +63,7 @@ public class PostServiceImpl implements PostService {
         if (applyPostCount >= 0) {
             return findTopNPostsByViewCount(Math.toIntExact(applyPostCount))
                     .stream()
-                    .map(PostResponseDto::from)
+                    .map(TodayApplyPostsResponseDto::from)
                     .toList();
         }
 
