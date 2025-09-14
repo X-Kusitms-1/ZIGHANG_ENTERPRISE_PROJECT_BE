@@ -46,13 +46,17 @@ public class PostController {
         return RspTemplate.success(Success.GET_API_REQUEST_SUCCESS, PageDto.from(postPage));
     }
 
-    @GetMapping("/today-apply/recommend")
-    @Operation(summary = "오늘의 추천 공고 목록 조회", description = "선택 하기 이전에 추천하는 리스트입니다. 지원할 공고 개수보다 5개 더 보입니다.")
+    @PostMapping("/today-apply/recommend")
+    @Operation(summary = "오늘의 추천 공고 목록 조회",
+            description = "선택하기 전에 추천하는 리스트입니다. 지원할 공고 개수보다 5개 더 보입니다. " +
+                    "isFirstApiCall = true의 경우 모든 응답이 새로운 데이터로 내려갑니다. isFirstApiCall = false의 경우 requireRefreshRecruitmentId로 받은 공고 데이터만 새로운 데이터로 대체되어 내려갑니다."
+    )
     public RspTemplate<?> getTodayApplyPosts(
-            @AuthenticationPrincipal UserDetailsImpl userDetails
+            @AuthenticationPrincipal UserDetailsImpl userDetails,
+            @RequestBody GetTodayApplyPostsRequest request
     ) {
         UserEntity loginUser = getUserEntityFromUserDetailsImpl(userDetails);
-        List<TodayApplyPostsResponseDto> todayApplyPosts = postService.getTodayApplyPostList(loginUser);
+        List<TodayApplyPostsResponseDto> todayApplyPosts = postService.getTodayApplyPostList(request, loginUser);
         return RspTemplate.success(Success.GET_API_REQUEST_SUCCESS, todayApplyPosts);
     }
 

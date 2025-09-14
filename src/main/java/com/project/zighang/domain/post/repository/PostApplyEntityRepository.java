@@ -27,7 +27,7 @@ public interface PostApplyEntityRepository extends JpaRepository<PostApplyEntity
     @Query("SELECT pa FROM PostApplyEntity pa JOIN FETCH pa.postEntity WHERE pa.userEntity = :user AND pa.applyStatus = :status AND pa.createdAt BETWEEN :startDate AND :endDate")
     List<PostApplyEntity> findAllByUserEntityAndApplyStatusAndCreatedAtBetweenWithPostFetch(@Param("user") UserEntity user, @Param("status") ApplyStatus status, @Param("startDate") LocalDateTime startDate, @Param("endDate") LocalDateTime endDate);
 
-    @Query("SELECT COUNT(pa) FROM PostApplyEntity pa " +
+    @Query("SELECT COALESCE(COUNT(pa), 0) FROM PostApplyEntity pa " +
             "WHERE pa.userEntity.id = :userId " +
             "AND pa.createdAt >= :startOfDay " +
             "AND pa.createdAt < :endOfDay")
@@ -35,7 +35,7 @@ public interface PostApplyEntityRepository extends JpaRepository<PostApplyEntity
                                @Param("startOfDay") LocalDateTime startOfDay,
                                @Param("endOfDay") LocalDateTime endOfDay);
 
-    @Query("SELECT COUNT(pa) FROM PostApplyEntity pa " +
+    @Query("SELECT COALESCE(COUNT(pa), 0) FROM PostApplyEntity pa " +
             "WHERE pa.userEntity.id = :userId " +
             "AND pa.createdAt >= :startOfWeek " +
             "AND pa.createdAt < :endOfWeek")
@@ -43,7 +43,8 @@ public interface PostApplyEntityRepository extends JpaRepository<PostApplyEntity
                                   @Param("startOfWeek") LocalDateTime startOfWeek,
                                   @Param("endOfWeek") LocalDateTime endOfWeek);
 
-    Integer countByUserEntityId(Long userId);
+    @Query("SELECT COUNT(p) FROM PostApplyEntity p WHERE p.userEntity.id = :userId")
+    Integer countByUserEntityIdSafe(@Param("userId") Long userId);
 
     Optional<PostApplyEntity> findPostApplyEntityByPostEntityAndUserEntity(PostEntity postEntity, UserEntity userEntity);
 }
