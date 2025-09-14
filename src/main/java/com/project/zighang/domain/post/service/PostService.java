@@ -21,4 +21,6 @@ public interface PostService {
     void deleteApplyPost(DeleteApplyJobDto request, UserEntity loginUser);
 
     void updateApplyStatus(PutPostApplyStatusDto request, UserEntity loginUser);
+
+    void postUserTodayPosts(PostTodayApplyPostsRequest request, UserEntity loginUser);
 }

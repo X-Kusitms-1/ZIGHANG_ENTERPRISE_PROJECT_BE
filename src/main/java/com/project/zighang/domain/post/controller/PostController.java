@@ -46,14 +46,25 @@ public class PostController {
         return RspTemplate.success(Success.GET_API_REQUEST_SUCCESS, PageDto.from(postPage));
     }
 
-    @GetMapping("/today-apply")
-    @Operation(summary = "오늘의 추천 공고 목록 조회")
+    @GetMapping("/today-apply/recommend")
+    @Operation(summary = "오늘의 추천 공고 목록 조회", description = "선택 하기 이전에 추천하는 리스트입니다. 지원할 공고 개수보다 5개 더 보입니다.")
     public RspTemplate<?> getTodayApplyPosts(
             @AuthenticationPrincipal UserDetailsImpl userDetails
     ) {
         UserEntity loginUser = getUserEntityFromUserDetailsImpl(userDetails);
         List<PostResponseDto> todayApplyPosts = postService.getTodayApplyPostList(loginUser);
         return RspTemplate.success(Success.GET_API_REQUEST_SUCCESS, todayApplyPosts);
+    }
+
+    @PostMapping("/today-apply")
+    @Operation(summary = "오늘의 추천 공고 목록 추가", description = "추천 받은 공고들중 오늘의 추천 리스트에 넣을 공고를 입력합니다.")
+    public RspTemplate<?> postTodayApplyPosts(
+            @AuthenticationPrincipal UserDetailsImpl userDetails,
+            @RequestBody PostTodayApplyPostsRequest request
+    ) {
+        UserEntity loginUser = getUserEntityFromUserDetailsImpl(userDetails);
+        postService.postUserTodayPosts(request, loginUser);
+        return RspTemplate.success(Success.POST_TODAY_APPLY);
     }
 
     @PostMapping("/apply")
@@ -100,7 +111,7 @@ public class PostController {
 
     @PutMapping("/apply-status")
     @Operation(
-            summary = "지원 상태 변경",
+            summary = "공고 합격 상태 변경",
             description = """
         지원한 공고의 합격 여부를 변경합니다.
         

@@ -3,6 +3,7 @@ package com.project.zighang.domain.user.controller;
 import com.project.zighang.domain.user.dto.request.AccuracyRequest;
 import com.project.zighang.domain.user.dto.request.ReportRequest;
 import com.project.zighang.domain.user.entity.Accuracy;
+import com.project.zighang.domain.user.service.UserServiceImpl;
 import com.project.zighang.global.exception.Error;
 import com.project.zighang.global.exception.Success;
 import com.project.zighang.global.exception.model.NotFoundException;
@@ -34,6 +35,7 @@ import java.time.LocalDate;
 public class UserController {
 
     private final UserService userService;
+    private final UserServiceImpl userServiceImpl;
 
     @PostMapping("/onboarding")
     @Operation(
@@ -77,10 +79,19 @@ public class UserController {
             @RequestBody PostUserTodayApplyCountDTO dto
     ) {
         UserEntity loginUser = getUserEntityFromUserDetailsImpl(userDetails);
-        log.info("START postUserTodayApplyCount for user: {}, count: {}", loginUser.getId(), dto.applyCount());
         userService.setUserApplyCount(dto, loginUser);
-        log.info("SUCCESS postUserTodayApplyCount for user: {}", loginUser.getId());
         return RspTemplate.success(Success.POST_USER_APPLY_COUNT_API_REQUEST_SUCCESS);
+    }
+
+    @GetMapping("/today-apply")
+    @Operation(
+            summary = "사용자 지정 오늘의 지원 리스트 조회"
+    )
+    public RspTemplate<?> getUserTodayApplyList(
+            @AuthenticationPrincipal UserDetailsImpl userDetails
+    ) {
+        UserEntity loginUser = getUserEntityFromUserDetailsImpl(userDetails);
+        return RspTemplate.success(Success.GET_API_REQUEST_SUCCESS, userServiceImpl.getUserTodayPosts(loginUser));
     }
 
     private UserEntity getUserEntityFromUserDetailsImpl(UserDetailsImpl userDetails) throws RuntimeException {
