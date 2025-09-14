@@ -111,7 +111,7 @@ public class PostController {
 
     @PutMapping("/apply-status")
     @Operation(
-            summary = "지원 상태 변경",
+            summary = "공고 합격 상태 변경",
             description = """
         지원한 공고의 합격 여부를 변경합니다.
         

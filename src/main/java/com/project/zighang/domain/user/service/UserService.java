@@ -6,6 +6,7 @@ import com.project.zighang.domain.user.dto.PostUserOnboardingDto;
 import com.project.zighang.domain.user.dto.PostUserTodayApplyCountDTO;
 import com.project.zighang.domain.user.dto.request.AccuracyRequest;
 import com.project.zighang.domain.user.dto.response.ReportResponse;
+import com.project.zighang.domain.user.dto.response.TodayPostResponseDto;
 import com.project.zighang.domain.user.entity.Accuracy;
 import com.project.zighang.domain.user.entity.UserEntity;
 
@@ -30,5 +31,5 @@ public interface UserService {
 
     Accuracy getAccuracy(UserEntity userEntity);
 
-    List<PostResponseDto> getUserTodayPosts(UserEntity loginUser);
+    List<TodayPostResponseDto> getUserTodayPosts(UserEntity loginUser);
 }

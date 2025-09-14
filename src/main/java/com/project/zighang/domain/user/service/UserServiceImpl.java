@@ -7,6 +7,7 @@ import com.project.zighang.domain.oauth2.service.TokenProvider;
 import com.project.zighang.domain.post.dto.PostResponseDto;
 import com.project.zighang.domain.post.entity.PostEntity;
 import com.project.zighang.domain.post.enumerate.ApplyStatus;
+import com.project.zighang.domain.post.repository.PostApplyEntityRepository;
 import com.project.zighang.domain.post.repository.PostEntityRepository;
 import com.project.zighang.domain.post.service.PostingFinder;
 import com.project.zighang.domain.user.dto.PostUserOnboardingDto;
@@ -14,6 +15,7 @@ import com.project.zighang.domain.user.dto.PostUserTodayApplyCountDTO;
 import com.project.zighang.domain.user.dto.WeekDateInfo;
 import com.project.zighang.domain.user.dto.request.AccuracyRequest;
 import com.project.zighang.domain.user.dto.response.ReportResponse;
+import com.project.zighang.domain.user.dto.response.TodayPostResponseDto;
 import com.project.zighang.domain.user.entity.*;
 import com.project.zighang.domain.user.repository.*;
 import com.project.zighang.global.client.azure.ReportGenerator;
@@ -28,7 +30,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
@@ -54,6 +58,7 @@ public class UserServiceImpl implements UserService {
     private final AccuracyRepository accuracyRepository;
     private final UserTodayPostRepository userTodayPostRepository;
     private final PostEntityRepository postEntityRepository;
+    private final PostApplyEntityRepository postApplyEntityRepository;
 
     @Override
     public void addUserOnboardingInfo(PostUserOnboardingDto request, UserEntity loginUser) {
@@ -151,7 +156,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<PostResponseDto> getUserTodayPosts(UserEntity loginUser) {
+    public List<TodayPostResponseDto> getUserTodayPosts(UserEntity loginUser) {
         List<UserTodayPostEntity> entities = userTodayPostRepository
                 .findByUserEntityIdWithPost(loginUser.getId());
 
@@ -161,8 +166,14 @@ public class UserServiceImpl implements UserService {
 
         List<PostEntity> posts = postEntityRepository.findAllById(recruitmentIds);
 
+        Map<Long, Boolean> applyStatusMap = new HashMap<>();
+        for (PostEntity post : posts) {
+            Boolean isApplied = postApplyEntityRepository.existsByUserEntityAndPostEntity(loginUser, post);
+            applyStatusMap.put(post.getRecruitmentId(), isApplied);
+        }
+
         return posts.stream()
-                .map(PostResponseDto::from)
+                .map(post -> TodayPostResponseDto.from(post, applyStatusMap.get(post.getRecruitmentId())))
                 .collect(Collectors.toList());
     }
 
