@@ -106,6 +106,17 @@ public class UserController {
         return RspTemplate.success(Success.DELETE_TODAY_APPLY);
     }
 
+    @GetMapping("/achievement/status")
+    @Operation(
+            summary = "사용자 목표달성 현황"
+    )
+    public RspTemplate<?> getUserAchievementStatus(
+            @AuthenticationPrincipal UserDetailsImpl userDetails
+    ) {
+        UserEntity loginUser = getUserEntityFromUserDetailsImpl(userDetails);
+        return RspTemplate.success(Success.GET_API_REQUEST_SUCCESS, userService.getAchievementStatus(loginUser));
+    }
+
     private UserEntity getUserEntityFromUserDetailsImpl(UserDetailsImpl userDetails) throws RuntimeException {
         if (userDetails == null) {
             log.warn("Authentication failed: UserDetailsImpl object is null.");
