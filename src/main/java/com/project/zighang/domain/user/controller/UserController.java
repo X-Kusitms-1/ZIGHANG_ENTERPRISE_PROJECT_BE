@@ -167,7 +167,7 @@ public class UserController {
     }
 
     @GetMapping("/accuracy")
-    @Operation(summary = "사용자 정확도 데이터를 조회합니다.")
+    @Operation(summary = "사용자 정확도 높이기 데이터를 조회합니다.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "정상적으로 정확도 결과를 불러왔습니다."),
             @ApiResponse(responseCode = "404", description = "사용자의 정확도 높이기 데이터를 찾을 수 없습니다.")
@@ -180,13 +180,13 @@ public class UserController {
     }
 
     @PostMapping("/accuracy")
-    @Operation(summary = "사용자 정확도 데이터를 생성합니다.")
+    @Operation(summary = "사용자 정확도 높이기 데이터를 생성합니다.")
     @ApiResponses({
             @ApiResponse(responseCode = "201", description = "정상적으로 정확도 결과가 저장됐습니다."),
             @ApiResponse(responseCode = "400", description = "이미 사용자의 데이터가 존재합니다.")
     })
     public RspTemplate<AccuracyRequest.answers> createAccuracy(@AuthenticationPrincipal UserDetailsImpl userDetails,
-                                          @RequestBody AccuracyRequest.answers answers) {
+                                                               @RequestBody AccuracyRequest.answers answers) {
         UserEntity loginUser = getUserEntityFromUserDetailsImpl(userDetails);
 
         Accuracy accuracy = userService.createAccuracy(loginUser, answers);
@@ -194,13 +194,13 @@ public class UserController {
     }
 
     @PutMapping("/accuracy")
-    @Operation(summary = "사용자 정확도 데이터를 수정합니다.")
+    @Operation(summary = "사용자 정확도 높이기 데이터를 수정합니다.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "정상적으로 정확도 결과를 수정했습니다."),
             @ApiResponse(responseCode = "404", description = "사요자의 정확도 높이기 데이터를 찾을 수 없습니다.")
     })
     public RspTemplate<AccuracyRequest.answers> updateAccuracy(@AuthenticationPrincipal UserDetailsImpl userDetails,
-                                            @RequestBody AccuracyRequest.answers answers) {
+                                                               @RequestBody AccuracyRequest.answers answers) {
         UserEntity loginUser = getUserEntityFromUserDetailsImpl(userDetails);
 
         Accuracy accuracy = userService.updateAccuracy(loginUser, answers);

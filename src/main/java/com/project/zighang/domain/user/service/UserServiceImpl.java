@@ -303,8 +303,9 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Accuracy getAccuracy(UserEntity userEntity){
-        return accuracyRepository.findByUserEntity(userEntity)
+        return accuracyRepository.findByUserEntityWithQuestions(userEntity)
                 .orElseThrow(() -> new NotFoundException(Error.ACCURACY_NOT_FOUND, "사용자의 정확도 높이기 데이터를 찾을 수 없습니다."));
     }
 }
