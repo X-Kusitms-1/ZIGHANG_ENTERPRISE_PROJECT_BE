@@ -3,6 +3,7 @@ package com.project.zighang.domain.post.dto;
 import com.project.zighang.domain.post.entity.PostApplyEntity;
 import com.project.zighang.domain.post.entity.PostEntity;
 
+import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -15,7 +16,8 @@ public record ApplyPostResponseDto(
         String companyName,
         String recruitmentOriginUrl,
         List<String> depthTwo,
-        String applyStatus
+        String applyStatus,
+        String createdAt
 ) {
     public static ApplyPostResponseDto from(PostApplyEntity entity) {
         PostEntity postEntity = entity.getPostEntity();
@@ -30,7 +32,8 @@ public record ApplyPostResponseDto(
                 filterValueInSummaryColumn("회사 명", postEntity.getSummaryData()),
                 filterValueInSummaryColumn("직무 명", postEntity.getSummaryData()),
                 cleanRawDepthTwoString(postEntity.getDepthTwo()),
-                applyStatus
+                applyStatus,
+                entity.getCreatedAt().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
         );
     }
 
