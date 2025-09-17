@@ -15,6 +15,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.Parameters;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.tomcat.util.http.fileupload.FileUploadException;
 import org.springframework.data.domain.Page;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -22,6 +23,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/post")
 @RequiredArgsConstructor
@@ -56,7 +58,16 @@ public class PostController {
             @RequestBody GetTodayApplyPostsRequest request
     ) {
         UserEntity loginUser = getUserEntityFromUserDetailsImpl(userDetails);
+        log.info("오늘의 추천 공고 목록 조회 시작 유저: {}", loginUser.getId());
         List<TodayApplyPostsResponseDto> todayApplyPosts = postService.getTodayApplyPostList(request, loginUser);
+
+        log.info("[API 최종 응답] User:{} RecruitmentIds: {}",
+                loginUser.getId(),
+                todayApplyPosts.stream()
+                        .map(TodayApplyPostsResponseDto::recruitmentId)
+                        .toList()
+        );
+
         return RspTemplate.success(Success.GET_API_REQUEST_SUCCESS, todayApplyPosts);
     }
 
