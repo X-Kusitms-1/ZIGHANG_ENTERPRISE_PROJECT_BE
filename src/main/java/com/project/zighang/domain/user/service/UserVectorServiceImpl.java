@@ -51,7 +51,7 @@ public class UserVectorServiceImpl implements UserVectorService {
     private final PromptFinder promptFinder;
 
     @Override
-    public void createUserProfileEmbedding(UserEntity user) {
+    public List<Double> createUserProfileEmbedding(UserEntity user) {
         log.info("사용자 프로필 임베딩 생성 시작: userId={}", user.getId());
 
         try {
@@ -60,14 +60,14 @@ public class UserVectorServiceImpl implements UserVectorService {
 
             if (!StringUtils.hasText(optimizedProfile)) {
                 log.warn("빈 프로필로 인한 임베딩 생성 스킵: userId={}", user.getId());
-                return;
+                return null;
             }
 
             List<Double> embeddingVector = embeddingGenerator.embed(optimizedProfile);
             log.info("임베딩 생성 완료: userId={}, profileLength={}, embeddingSize={}",
                     user.getId(), optimizedProfile.length(), embeddingVector.size());
 
-            // TODO: 임베딩 벡터 저장 로직 추가
+            return embeddingVector;
 
         } catch (Exception e) {
             log.error("임베딩 생성 실패: userId={}", user.getId(), e);
