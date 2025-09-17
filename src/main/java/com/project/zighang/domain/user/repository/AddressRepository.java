@@ -8,6 +8,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.Optional;
+
 
 @Repository
 public interface AddressRepository extends JpaRepository<AddressEntity, Long> {
@@ -15,4 +17,6 @@ public interface AddressRepository extends JpaRepository<AddressEntity, Long> {
     @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Query("DELETE FROM AddressEntity a WHERE a.userEntity = :user")
     void deleteAllByUserEntity(@Param("user") UserEntity user);
+
+    Optional<AddressEntity> findByUserEntity(UserEntity user);
 }

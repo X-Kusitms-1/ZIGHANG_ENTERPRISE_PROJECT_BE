@@ -24,6 +24,10 @@ public record ClovaOcrRequest(
         return create(version, lang, List.of(Image.create("png", "input", imageUrl)));
     }
 
+    public static ClovaOcrRequest createPdf(String version, String lang, String resultType, String imageUrl) {
+        return create(version, lang, List.of(Image.create("pdf", "input", imageUrl)));
+    }
+
     public record Image(
             String format,
             String name,
