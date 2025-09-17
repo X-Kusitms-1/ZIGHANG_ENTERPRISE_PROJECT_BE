@@ -34,7 +34,7 @@ public class UserVectorServiceImpl implements UserVectorService {
 
     private static final String CORE_INFO_PREFIX = "핵심역량: ";
     private static final String PREFERENCE_PREFIX = "희망조건: ";
-    private static final String EXPERIENCE_PREFIX = "경력정보: ";
+    private static final String EXPERIENCE_PREFIX = "이력서: ";
     private static final String QUALIFICATION_PREFIX = "보유자격: ";
 
     private final UserOnboardingRepository userOnboardingRepository;
@@ -51,7 +51,6 @@ public class UserVectorServiceImpl implements UserVectorService {
     private final PromptFinder promptFinder;
 
     @Override
-    @Transactional(readOnly = true)
     public void createUserProfileEmbedding(UserEntity user) {
         log.info("사용자 프로필 임베딩 생성 시작: userId={}", user.getId());
 
@@ -89,7 +88,6 @@ public class UserVectorServiceImpl implements UserVectorService {
         builder.addSection(QUALIFICATION_PREFIX, qualifications);
 
         String experienceInResumeFiles = buildExperienceInResumeFiles(user);
-//        builder.addSection(EXPERIENCE_PREFIX, experienceKeywords);
         String llmResponseByResumeFiles = generateLLMResponseUsingResumeOcrData(experienceInResumeFiles);
         builder.addSection(EXPERIENCE_PREFIX, llmResponseByResumeFiles);
 
