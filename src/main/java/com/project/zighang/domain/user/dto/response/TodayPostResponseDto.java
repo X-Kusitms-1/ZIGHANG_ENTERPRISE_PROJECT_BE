@@ -32,7 +32,7 @@ public record TodayPostResponseDto(
                 entity.getMinCareer(),
                 entity.getMaxCareer(),
                 entity.getRecruitmentEndDate(),
-                filterValueInSummaryColumn("회사 명", entity.getSummaryData()),
+                getCompanyName(entity.getSummaryData()),
                 filterValueInSummaryColumn("직무 명", entity.getSummaryData()),
                 entity.getRecruitmentOriginalUrl(),
                 cleanRawDepthTwoString(entity.getDepthTwo()),
@@ -40,7 +40,14 @@ public record TodayPostResponseDto(
         );
     }
 
-    // ✅ 기존 메소드 (기본값 false)
+    private static String getCompanyName(String postSummary) {
+        String companyName = filterValueInSummaryColumn("회사 명", postSummary);
+        if (companyName == null) {
+            return filterValueInSummaryColumn("회사명", postSummary);
+        }
+        return companyName;
+    }
+
     public static TodayPostResponseDto from(PostEntity entity) {
         return from(entity, false);
     }
@@ -59,11 +66,19 @@ public record TodayPostResponseDto(
             return null;
         }
 
-        Pattern pattern = Pattern.compile("\\*\\*" + Pattern.quote(value) + "\\*\\*\\s*:\\s*(.*)");
-        Matcher matcher = pattern.matcher(summary);
+        String[] patterns = {
+                "\\*\\*\\s*" + Pattern.quote(value) + "\\s*\\*\\*\\s*:\\s*(.*)",
+                "\\*\\*\\s*" + Pattern.quote(value) + "\\s*:\\s*(.*)",
+                Pattern.quote(value) + "\\s*:\\s*(.*)"
+        };
 
-        if (matcher.find()) {
-            return matcher.group(1).trim();
+        for (String patternStr : patterns) {
+            Pattern pattern = Pattern.compile(patternStr, Pattern.CASE_INSENSITIVE);
+            Matcher matcher = pattern.matcher(summary);
+
+            if (matcher.find()) {
+                return matcher.group(1).trim();
+            }
         }
 
         return null;
