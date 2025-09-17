@@ -75,11 +75,17 @@ public class PostServiceImpl implements PostService {
                     .map(TodayApplyPostsResponseDto::from)
                     .toList();
 
+            // 초기 ID 리스트 로그
+            List<Long> idList = todayApplyPostsResponseDtoList.stream()
+                    .map(TodayApplyPostsResponseDto::recruitmentId)
+                    .toList();
+            log.info("[첫 요청] User:{} IDs: {}", loginUser.getId(), idList);
+
             postRecommendationService.deleteAndCreateUserRecommendations(loginUser.getId(), todayApplyPostsResponseDtoList);
 
             return todayApplyPostsResponseDtoList;
+
         } else {
-            // when user refresh post
             List<TodayApplyPostsResponseDto> existingPosts = postRecommendationService.getRecommendations(loginUser.getId());
 
             if (existingPosts.isEmpty()) {
@@ -88,40 +94,73 @@ public class PostServiceImpl implements PostService {
             }
 
             Long requiredRefreshRecruitmentId = request.requireRefreshRecruitmentId();
+
+            // 새로고침 전 ID 리스트
+            List<Long> beforeIds = existingPosts.stream()
+                    .map(TodayApplyPostsResponseDto::recruitmentId)
+                    .toList();
+            log.info("[새로고침 전] User:{} 교체대상:{} IDs: {}",
+                    loginUser.getId(), requiredRefreshRecruitmentId, beforeIds);
+
+            Set<Long> currentListIds = existingPosts.stream()
+                    .map(TodayApplyPostsResponseDto::recruitmentId)
+                    .collect(Collectors.toSet());
+
             List<TodayApplyPostsResponseDto> updatedPosts = existingPosts.stream()
                     .map(post -> {
                         if (post.recruitmentId().equals(requiredRefreshRecruitmentId)) {
-                            return getReplacementPost(requiredRefreshRecruitmentId, post);
+                            TodayApplyPostsResponseDto newPost = getReplacementPost(
+                                    loginUser.getId(),
+                                    requiredRefreshRecruitmentId,
+                                    currentListIds
+                            );
+                            return newPost != null ? newPost : post;
                         }
                         return post;
                     })
                     .toList();
 
-            postRecommendationService.deleteAndCreateUserRecommendations(loginUser.getId(), updatedPosts);
+            // 새로고침 후 ID 리스트
+            List<Long> afterIds = updatedPosts.stream()
+                    .map(TodayApplyPostsResponseDto::recruitmentId)
+                    .toList();
+            log.info("[새로고침 후] User:{} IDs: {}", loginUser.getId(), afterIds);
+
+            // 변경 체크
+            for (int i = 0; i < beforeIds.size(); i++) {
+                if (!beforeIds.get(i).equals(afterIds.get(i))) {
+                    if (beforeIds.get(i).equals(requiredRefreshRecruitmentId)) {
+                        log.info("   ↳ [{}]번 인덱스 정상 교체: {} → {}",
+                                i, beforeIds.get(i), afterIds.get(i));
+                    } else {
+                        log.error("   ↳ [{}]번 인덱스 비정상 변경: {} → {}",
+                                i, beforeIds.get(i), afterIds.get(i));
+                    }
+                }
+            }
+
+            postRecommendationService.deleteAndCreateUserRecommendations(
+                    loginUser.getId(),
+                    updatedPosts
+            );
 
             return updatedPosts;
         }
     }
 
-    private TodayApplyPostsResponseDto getReplacementPost(Long originalId, TodayApplyPostsResponseDto fallbackPost) {
-        Long newRecruitmentId = calculateNewRecruitmentId(originalId);
+    private TodayApplyPostsResponseDto getReplacementPost(Long userId, Long originalId, Set<Long> currentListIds) {
+        TodayApplyPostsResponseDto newPost =
+                postRecommendationService.getNextRecommendation(userId, currentListIds);
 
-        return postEntityRepository.findById(newRecruitmentId)
-                .map(TodayApplyPostsResponseDto::from)
-                .orElseGet(() -> {
-                    log.warn("대체 게시글 {}를 찾을 수 없음. 기존 게시글 유지", newRecruitmentId);
-                    return fallbackPost; // 새 게시글 없으면 기존 게시글 유지
-                });
-    }
-
-    private Long calculateNewRecruitmentId(Long originalId) {
-        long newId = originalId + REFRESH_ID_INCREMENT;
-
-        if (newId >= MAX_RECRUITMENT_ID) {
-            newId -= ROLLBACK_DECREMENT;
+        if (newPost != null) {
+            log.info("사용자 {} - 공고 {}를 {}로 교체 성공",
+                    userId, originalId, newPost.recruitmentId());
+            return newPost;
+        } else {
+            log.warn("사용자 {} - 공고 {} 교체 실패. 대체 공고를 찾을 수 없음",
+                    userId, originalId);
+            return null;
         }
-
-        return newId;
     }
 
     @Override
