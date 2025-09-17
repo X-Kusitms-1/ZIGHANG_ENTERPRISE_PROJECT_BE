@@ -4,6 +4,7 @@ import com.project.zighang.domain.user.dto.request.AccuracyRequest;
 import com.project.zighang.domain.user.dto.request.ReportRequest;
 import com.project.zighang.domain.user.entity.Accuracy;
 import com.project.zighang.domain.user.service.UserServiceImpl;
+import com.project.zighang.domain.user.service.UserVectorService;
 import com.project.zighang.global.exception.Error;
 import com.project.zighang.global.exception.Success;
 import com.project.zighang.global.exception.model.NotFoundException;
@@ -35,7 +36,7 @@ import java.time.LocalDate;
 public class UserController {
 
     private final UserService userService;
-    private final UserServiceImpl userServiceImpl;
+    private final UserVectorService userVectorService;
 
     @PostMapping("/onboarding")
     @Operation(
@@ -91,7 +92,7 @@ public class UserController {
             @AuthenticationPrincipal UserDetailsImpl userDetails
     ) {
         UserEntity loginUser = getUserEntityFromUserDetailsImpl(userDetails);
-        return RspTemplate.success(Success.GET_API_REQUEST_SUCCESS, userServiceImpl.getUserTodayPosts(loginUser));
+        return RspTemplate.success(Success.GET_API_REQUEST_SUCCESS, userService.getUserTodayPosts(loginUser));
     }
 
     @DeleteMapping("today-apply")
@@ -225,5 +226,15 @@ public class UserController {
 
         Accuracy accuracy = userService.updateAccuracy(loginUser, answers);
         return RspTemplate.success(Success.ACCURACY_RESULT_UPDATE_SUCCESS, AccuracyRequest.answers.from(accuracy));
+    }
+
+    @PostMapping("/user-embedding")
+    @Operation(summary = "사용자 데이터 임베딩 테스트 API")
+    public RspTemplate<?> createAndSaveUserEmbeddedData(
+            @AuthenticationPrincipal UserDetailsImpl userDetails
+    ) {
+        UserEntity loginUser = getUserEntityFromUserDetailsImpl(userDetails);
+        userVectorService.createUserProfileEmbedding(loginUser);
+        return RspTemplate.success(Success.USER_EMBEDDED_DATA);
     }
 }
