@@ -30,6 +30,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -47,7 +48,6 @@ public class PostServiceImpl implements PostService {
     private final UserTodayPostRepository userTodayPostRepository;
     private final PostRecommendsFinder postRecommendsFinder;
     private final UserVectorService userVectorService;
-    private final PostRecommendationService postRecommendationService;
 
     private static final int MAX_SIZE = 50;
 
@@ -62,110 +62,123 @@ public class PostServiceImpl implements PostService {
 
     @Override
     public List<TodayApplyPostsResponseDto> getTodayApplyPostList(GetTodayApplyPostsRequest request, UserEntity loginUser) {
-        long applyPostCount = 1;
-        if (request.isFirstApiCall()) {
-            // first time
-            UserOnboardingEntity userOnboardingEntity = userOnboardingRepository.findByUserEntity(loginUser).orElseThrow(
-                    () -> new NotFoundException(
-                            Error.NOT_FOUND_USER_ONBOARDING, Error.NOT_FOUND_USER_ONBOARDING.getMessage())
-            );
 
-            applyPostCount = userOnboardingEntity.getDailyRecommendPostCount() + 5;
+        // 1. 사용자 온보딩 정보에서 하루에 보여줄 공고 개수를 가져옵니다.
+        UserOnboardingEntity userOnboardingEntity = userOnboardingRepository.findByUserEntity(loginUser)
+                .orElseThrow(() -> new NotFoundException(
+                        Error.NOT_FOUND_USER_ONBOARDING,
+                        Error.NOT_FOUND_USER_ONBOARDING.getMessage())
+                );
 
-            // TASK - must switch findTopNPostsByViewCount to recommend module
-            List<TodayApplyPostsResponseDto> todayApplyPostsResponseDtoList = findRecommendedPostsFromOp((int)applyPostCount, loginUser)
-                    .stream()
-                    .map(TodayApplyPostsResponseDto::from)
-                    .toList();
+        // 2. 표시할 공고 개수를 설정합니다. (기존 로직: 추천 개수 + 5)
+        int displayCount = (int) (userOnboardingEntity.getDailyRecommendPostCount() + 5);
 
-            log.info("추천 결과: {}", todayApplyPostsResponseDtoList);
+        log.info("[조회수 순 조회] User:{} 요청개수:{}", loginUser.getId(), displayCount);
 
-            // 초기 ID 리스트 로그
-            List<Long> idList = todayApplyPostsResponseDtoList.stream()
-                    .map(TodayApplyPostsResponseDto::recruitmentId)
-                    .toList();
-            log.info("[첫 요청] User:{} IDs: {}", loginUser.getId(), idList);
+        // 3. PostRepository를 사용하여 조회수(viewCount)가 높은 순으로 공고를 조회합니다.
+        List<PostEntity> topPosts = postEntityRepository.findAllByOrderByViewCountDesc(
+                PageRequest.of(0, displayCount)
+        );
 
-            postRecommendationService.deleteAndCreateUserRecommendations(loginUser.getId(), todayApplyPostsResponseDtoList);
-
-            return todayApplyPostsResponseDtoList;
-
-        } else {
-            List<TodayApplyPostsResponseDto> existingPosts = postRecommendationService.getRecommendations(loginUser.getId());
-
-            if (existingPosts.isEmpty()) {
-                log.warn("사용자 {}의 기존 메모리 데이터가 없습니다. 첫 번째 요청으로 처리", loginUser.getId());
-                return getTodayApplyPostList(new GetTodayApplyPostsRequest(true, loginUser.getId()), loginUser);
-            }
-
-            Long requiredRefreshRecruitmentId = request.requireRefreshRecruitmentId();
-
-            // 새로고침 전 ID 리스트
-            List<Long> beforeIds = existingPosts.stream()
-                    .map(TodayApplyPostsResponseDto::recruitmentId)
-                    .toList();
-            log.info("[새로고침 전] User:{} 교체대상:{} IDs: {}",
-                    loginUser.getId(), requiredRefreshRecruitmentId, beforeIds);
-
-            Set<Long> currentListIds = existingPosts.stream()
-                    .map(TodayApplyPostsResponseDto::recruitmentId)
-                    .collect(Collectors.toSet());
-
-            List<TodayApplyPostsResponseDto> updatedPosts = existingPosts.stream()
-                    .map(post -> {
-                        if (post.recruitmentId().equals(requiredRefreshRecruitmentId)) {
-                            TodayApplyPostsResponseDto newPost = getReplacementPost(
-                                    loginUser.getId(),
-                                    requiredRefreshRecruitmentId,
-                                    currentListIds
-                            );
-                            return newPost != null ? newPost : post;
-                        }
-                        return post;
-                    })
-                    .toList();
-
-            // 새로고침 후 ID 리스트
-            List<Long> afterIds = updatedPosts.stream()
-                    .map(TodayApplyPostsResponseDto::recruitmentId)
-                    .toList();
-            log.info("[새로고침 후] User:{} IDs: {}", loginUser.getId(), afterIds);
-
-            // 변경 체크
-            for (int i = 0; i < beforeIds.size(); i++) {
-                if (!beforeIds.get(i).equals(afterIds.get(i))) {
-                    if (beforeIds.get(i).equals(requiredRefreshRecruitmentId)) {
-                        log.info("   ↳ [{}]번 인덱스 정상 교체: {} → {}",
-                                i, beforeIds.get(i), afterIds.get(i));
-                    } else {
-                        log.error("   ↳ [{}]번 인덱스 비정상 변경: {} → {}",
-                                i, beforeIds.get(i), afterIds.get(i));
-                    }
-                }
-            }
-
-            postRecommendationService.deleteAndCreateUserRecommendations(
-                    loginUser.getId(),
-                    updatedPosts
-            );
-
-            return updatedPosts;
+        if (topPosts.isEmpty()) {
+            log.warn("조회할 공고가 없습니다. User:{}", loginUser.getId());
+            return new ArrayList<>();
         }
-    }
 
-    private TodayApplyPostsResponseDto getReplacementPost(Long userId, Long originalId, Set<Long> currentListIds) {
-        TodayApplyPostsResponseDto newPost =
-                postRecommendationService.getNextRecommendation(userId, currentListIds);
+        // 4. 조회된 PostEntity 리스트를 DTO 리스트로 변환하여 반환합니다.
+        return topPosts.stream()
+                .map(TodayApplyPostsResponseDto::from)
+                .collect(Collectors.toList());
 
-        if (newPost != null) {
-            log.info("사용자 {} - 공고 {}를 {}로 교체 성공",
-                    userId, originalId, newPost.recruitmentId());
-            return newPost;
-        } else {
-            log.warn("사용자 {} - 공고 {} 교체 실패. 대체 공고를 찾을 수 없음",
-                    userId, originalId);
-            return null;
-        }
+//        long applyPostCount = 1;
+//        if (request.isFirstApiCall()) {
+//            // first time
+//            UserOnboardingEntity userOnboardingEntity = userOnboardingRepository.findByUserEntity(loginUser).orElseThrow(
+//                    () -> new NotFoundException(
+//                            Error.NOT_FOUND_USER_ONBOARDING, Error.NOT_FOUND_USER_ONBOARDING.getMessage())
+//            );
+//
+//            applyPostCount = userOnboardingEntity.getDailyRecommendPostCount() + 5;
+//
+//            // TASK - must switch findTopNPostsByViewCount to recommend module
+//            List<TodayApplyPostsResponseDto> todayApplyPostsResponseDtoList = findRecommendedPostsFromOp((int)applyPostCount, loginUser)
+//                    .stream()
+//                    .map(TodayApplyPostsResponseDto::from)
+//                    .toList();
+//
+//            log.info("추천 결과: {}", todayApplyPostsResponseDtoList);
+//
+//            // 초기 ID 리스트 로그
+//            List<Long> idList = todayApplyPostsResponseDtoList.stream()
+//                    .map(TodayApplyPostsResponseDto::recruitmentId)
+//                    .toList();
+//            log.info("[첫 요청] User:{} IDs: {}", loginUser.getId(), idList);
+//
+//            postRecommendationService.deleteAndCreateUserRecommendations(loginUser.getId(), todayApplyPostsResponseDtoList);
+//
+//            return todayApplyPostsResponseDtoList;
+//
+//        } else {
+//            List<TodayApplyPostsResponseDto> existingPosts = postRecommendationService.getRecommendations(loginUser.getId());
+//
+//            if (existingPosts.isEmpty()) {
+//                log.warn("사용자 {}의 기존 메모리 데이터가 없습니다. 첫 번째 요청으로 처리", loginUser.getId());
+//                return getTodayApplyPostList(new GetTodayApplyPostsRequest(true, loginUser.getId()), loginUser);
+//            }
+//
+//            Long requiredRefreshRecruitmentId = request.requireRefreshRecruitmentId();
+//
+//            // 새로고침 전 ID 리스트
+//            List<Long> beforeIds = existingPosts.stream()
+//                    .map(TodayApplyPostsResponseDto::recruitmentId)
+//                    .toList();
+//            log.info("[새로고침 전] User:{} 교체대상:{} IDs: {}",
+//                    loginUser.getId(), requiredRefreshRecruitmentId, beforeIds);
+//
+//            Set<Long> currentListIds = existingPosts.stream()
+//                    .map(TodayApplyPostsResponseDto::recruitmentId)
+//                    .collect(Collectors.toSet());
+//
+//            List<TodayApplyPostsResponseDto> updatedPosts = existingPosts.stream()
+//                    .map(post -> {
+//                        if (post.recruitmentId().equals(requiredRefreshRecruitmentId)) {
+//                            TodayApplyPostsResponseDto newPost = getReplacementPost(
+//                                    loginUser.getId(),
+//                                    requiredRefreshRecruitmentId,
+//                                    currentListIds
+//                            );
+//                            return newPost != null ? newPost : post;
+//                        }
+//                        return post;
+//                    })
+//                    .toList();
+//
+//            // 새로고침 후 ID 리스트
+//            List<Long> afterIds = updatedPosts.stream()
+//                    .map(TodayApplyPostsResponseDto::recruitmentId)
+//                    .toList();
+//            log.info("[새로고침 후] User:{} IDs: {}", loginUser.getId(), afterIds);
+//
+//            // 변경 체크
+//            for (int i = 0; i < beforeIds.size(); i++) {
+//                if (!beforeIds.get(i).equals(afterIds.get(i))) {
+//                    if (beforeIds.get(i).equals(requiredRefreshRecruitmentId)) {
+//                        log.info("   ↳ [{}]번 인덱스 정상 교체: {} → {}",
+//                                i, beforeIds.get(i), afterIds.get(i));
+//                    } else {
+//                        log.error("   ↳ [{}]번 인덱스 비정상 변경: {} → {}",
+//                                i, beforeIds.get(i), afterIds.get(i));
+//                    }
+//                }
+//            }
+//
+//            postRecommendationService.deleteAndCreateUserRecommendations(
+//                    loginUser.getId(),
+//                    updatedPosts
+//            );
+//
+//            return updatedPosts;
+//        }
     }
 
     @Override
