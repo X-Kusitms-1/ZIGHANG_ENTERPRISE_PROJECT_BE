@@ -325,6 +325,7 @@ public class PostServiceImpl implements PostService {
         List<Long> recommendedIds = ViewResponse.items().stream()
                 .map(OpenSearchDto.KnnView::doc_id)
                 .filter(Objects::nonNull)
+                .map(id -> id + 1)
                 .map(Long::valueOf)
                 .collect(Collectors.toList());
 
