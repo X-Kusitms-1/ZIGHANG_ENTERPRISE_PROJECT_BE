@@ -13,9 +13,9 @@ import java.util.List;
 public interface UserTodayPostRepository extends JpaRepository<UserTodayPostEntity, Long> {
 
     @Query("SELECT utp FROM UserTodayPostEntity utp " +
-            "JOIN FETCH utp.postEntity " +  // N+1 방지
+            "JOIN FETCH utp.postEntity " +
             "WHERE utp.userEntity.id = :userId " +
-            "ORDER BY utp.createdAt DESC")  // 최신 등록 순
+            "ORDER BY utp.createdAt DESC")
     List<UserTodayPostEntity> findByUserEntityIdWithPost(@Param("userId") Long userId);
 
     void deleteByUserEntity(UserEntity loginUser);

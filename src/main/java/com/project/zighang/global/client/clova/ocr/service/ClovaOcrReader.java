@@ -4,11 +4,13 @@ import com.project.zighang.global.client.clova.ocr.OcrReader;
 import com.project.zighang.global.client.clova.ocr.dto.ClovaOcrRequest;
 import com.project.zighang.global.client.clova.ocr.dto.ClovaOcrResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.function.Predicate;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ClovaOcrReader implements OcrReader {
@@ -24,6 +26,19 @@ public class ClovaOcrReader implements OcrReader {
     public String extractTxtFromUrl(String imageUrl){
         ClovaOcrResponse ocrResponse = extractFromUrl(imageUrl);
         return extractTextWithFilter(ocrResponse, img -> true);
+    }
+
+    @Override
+    public String extractTextFromPdf(String imageUrl) {
+        ClovaOcrResponse ocrResponse = extractFromPdfUrl(imageUrl);
+        String result = extractTextWithFilter(ocrResponse, img -> true);
+        log.info("OCR SUCCESS");
+        return result;
+    }
+
+    private ClovaOcrResponse extractFromPdfUrl(String imageUrl) {
+        ClovaOcrRequest req = ClovaOcrRequest.createPdf("V1", "ko", null, imageUrl);
+        return clovaOcrClient.extractTextByUrl(req);
     }
 
     @Override

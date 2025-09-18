@@ -31,7 +31,8 @@ public enum Success implements ApiResponseCode {
     ACCURACY_RESULT_SAVE_SUCCESS(HttpStatus.CREATED, "정상적으로 정확도 결과가 저장됐습니다."),
     POST_USER_APPLY_COUNT_API_REQUEST_SUCCESS(HttpStatus.OK, "유저 하루 추천 공고 개수가 설정되었습니다."),
     POST_RESUME(HttpStatus.OK, "이력서가 정상적으로 저장됐습니다."),
-    POST_TODAY_APPLY(HttpStatus.OK, "오늘의 지원 리스트에 정상적으로 저장됐습니다.");
+    POST_TODAY_APPLY(HttpStatus.OK, "오늘의 지원 리스트에 정상적으로 저장됐습니다."),
+    USER_EMBEDDED_DATA(HttpStatus.CREATED, "사용자 임베딩 데이터가 정상적으로 저장됐습니다.");
 
 
 
