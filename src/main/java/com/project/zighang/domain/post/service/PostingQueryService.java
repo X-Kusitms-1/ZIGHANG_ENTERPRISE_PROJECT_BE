@@ -45,6 +45,4 @@ public class PostingQueryService implements PostingFinder {
                 .map(PostApplyEntity::getPostEntity)
                 .collect(Collectors.toList());
     }
-
-
 }

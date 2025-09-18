@@ -22,14 +22,14 @@ public class OpenSearchDto {
     }
 
     public static record KnnViewResponse(int took, int total, List<KnnView> items) {
-        public static KnnViewResponse from(SearchResponse<JobReasoningSource> res) {
-            var items = res.mapHits(h -> new KnnView(
+        public static KnnViewResponse from(SearchResponse<JobReasoningSource> response) {
+            var items = response.mapHits(h -> new KnnView(
                     h._id(),
                     h._score() != null ? h._score() : 0.0,
                     h._source() != null ? h._source().doc_id() : null
             ));
-            int total = (res.hits() != null && res.hits().total() != null) ? res.hits().total().value() : items.size();
-            return new KnnViewResponse(res.took(), total, items);
+            int total = (response.hits() != null && response.hits().total() != null) ? response.hits().total().value() : items.size();
+            return new KnnViewResponse(response.took(), total, items);
         }
     }
 

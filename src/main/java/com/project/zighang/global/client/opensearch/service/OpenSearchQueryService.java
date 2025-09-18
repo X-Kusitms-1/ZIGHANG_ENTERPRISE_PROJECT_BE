@@ -1,5 +1,6 @@
 package com.project.zighang.global.client.opensearch.service;
 
+import com.project.zighang.global.client.opensearch.PostRecommendsFinder;
 import com.project.zighang.global.client.opensearch.dto.OpenSearchDto;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -11,7 +12,7 @@ import org.springframework.web.client.RestClient;
 import java.util.Map;
 
 @Service
-public class OpenSearchQueryService {
+public class OpenSearchQueryService implements PostRecommendsFinder {
 
     private final RestClient OpClient;
 
@@ -25,7 +26,8 @@ public class OpenSearchQueryService {
     @Value("${opensearch.vector-field:jobReasoning}")
     private String vfield;
 
-    OpenSearchDto.SearchResponse<OpenSearchDto.JobReasoningSource> knnRaw(OpenSearchDto.KnnReq knnRequest) {
+    @Override
+    public OpenSearchDto.SearchResponse<OpenSearchDto.JobReasoningSource> knnRaw(OpenSearchDto.KnnReq knnRequest) {
 
         Map<String, Object> body = Map.of(
                 "size", knnRequest.k(),
@@ -42,7 +44,8 @@ public class OpenSearchQueryService {
                 .body(new ParameterizedTypeReference<OpenSearchDto.SearchResponse<OpenSearchDto.JobReasoningSource>>() {});
     }
 
-    OpenSearchDto.KnnViewResponse knn(OpenSearchDto.KnnReq knnRequest) {
+    @Override
+    public OpenSearchDto.KnnViewResponse knn(OpenSearchDto.KnnReq knnRequest) {
         OpenSearchDto.SearchResponse<OpenSearchDto.JobReasoningSource> response = knnRaw(knnRequest);
         return OpenSearchDto.KnnViewResponse.from(response);
     }

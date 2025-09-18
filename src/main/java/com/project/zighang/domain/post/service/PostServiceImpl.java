@@ -4,6 +4,8 @@ import com.project.zighang.domain.post.dto.*;
 import com.project.zighang.domain.post.enumerate.ApplyStatus;
 import com.project.zighang.domain.user.entity.UserTodayPostEntity;
 import com.project.zighang.domain.user.repository.UserTodayPostRepository;
+import com.project.zighang.global.client.opensearch.PostRecommendsFinder;
+import com.project.zighang.global.client.opensearch.dto.OpenSearchDto;
 import com.project.zighang.global.exception.Error;
 import com.project.zighang.global.exception.model.BadRequestException;
 import com.project.zighang.global.exception.model.NotFoundException;
@@ -43,7 +45,7 @@ public class PostServiceImpl implements PostService {
     private final UserOnboardingRepository userOnboardingRepository;
     private final PostApplyEntityRepository postApplyEntityRepository;
     private final UserTodayPostRepository userTodayPostRepository;
-
+    private final PostRecommendsFinder postRecommendsFinder;
     private final PostRecommendationService postRecommendationService;
 
     private static final int MAX_SIZE = 50;
@@ -275,4 +277,23 @@ public class PostServiceImpl implements PostService {
         Pageable pageable = PageRequest.of(0, count, Sort.by("viewCount").descending());
         return postEntityRepository.findAll(pageable).getContent();
     }
+
+    private List<PostEntity> findRecommendedPostsFromOp(Integer k, List<Double> vector) {
+        OpenSearchDto.KnnViewResponse ViewResponse = postRecommendsFinder.knn(new OpenSearchDto.KnnReq(vector, k));
+
+        List<Long> recommendedIds = ViewResponse.items().stream()
+                .map(OpenSearchDto.KnnView::doc_id)
+                .filter(Objects::nonNull)
+                .map(Long::valueOf)
+                .collect(Collectors.toList());
+
+        if (recommendedIds.isEmpty()) {
+            log.info("오픈서치에서 추천된 공고가 없습니다. k={}, vector size={}", k, vector.size());
+            return List.of();
+        }
+
+        return postEntityRepository.findAllById(recommendedIds);
+    }
+
+
 }
