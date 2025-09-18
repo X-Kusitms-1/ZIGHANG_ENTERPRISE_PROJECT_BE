@@ -78,6 +78,9 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-data-redis'
 	implementation 'org.springframework.session:spring-session-data-redis'
 
+	// OpenSearch/Elasticsearch 클라이언트
+	implementation 'org.elasticsearch.client:elasticsearch-rest-high-level-client:7.17.9'
+	implementation 'org.elasticsearch:elasticsearch:7.17.9'
 }
 
 tasks.named('test') {
