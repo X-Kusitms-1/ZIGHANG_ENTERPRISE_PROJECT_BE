@@ -4,6 +4,9 @@ import com.project.zighang.domain.post.dto.*;
 import com.project.zighang.domain.post.enumerate.ApplyStatus;
 import com.project.zighang.domain.user.entity.UserTodayPostEntity;
 import com.project.zighang.domain.user.repository.UserTodayPostRepository;
+import com.project.zighang.domain.user.service.UserVectorService;
+import com.project.zighang.global.client.opensearch.PostRecommendsFinder;
+import com.project.zighang.global.client.opensearch.dto.OpenSearchDto;
 import com.project.zighang.global.exception.Error;
 import com.project.zighang.global.exception.model.BadRequestException;
 import com.project.zighang.global.exception.model.NotFoundException;
@@ -20,6 +23,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.core.userdetails.ReactiveUserDetailsPasswordService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,6 +31,7 @@ import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -40,13 +45,11 @@ public class PostServiceImpl implements PostService {
     private final UserOnboardingRepository userOnboardingRepository;
     private final PostApplyEntityRepository postApplyEntityRepository;
     private final UserTodayPostRepository userTodayPostRepository;
-
+    private final PostRecommendsFinder postRecommendsFinder;
+    private final UserVectorService userVectorService;
     private final PostRecommendationService postRecommendationService;
 
     private static final int MAX_SIZE = 50;
-    private static final int REFRESH_ID_INCREMENT = 100;
-    private static final long MAX_RECRUITMENT_ID = 12000L;
-    private static final int ROLLBACK_DECREMENT = 200;
 
     @Override
     @Transactional(readOnly = true)
@@ -70,10 +73,12 @@ public class PostServiceImpl implements PostService {
             applyPostCount = userOnboardingEntity.getDailyRecommendPostCount() + 5;
 
             // TASK - must switch findTopNPostsByViewCount to recommend module
-            List<TodayApplyPostsResponseDto> todayApplyPostsResponseDtoList = findTopNPostsByViewCount(Math.toIntExact(applyPostCount))
+            List<TodayApplyPostsResponseDto> todayApplyPostsResponseDtoList = findRecommendedPostsFromOp((int)applyPostCount, loginUser)
                     .stream()
                     .map(TodayApplyPostsResponseDto::from)
                     .toList();
+
+            log.info("추천 결과: {}", todayApplyPostsResponseDtoList);
 
             // 초기 ID 리스트 로그
             List<Long> idList = todayApplyPostsResponseDtoList.stream()
@@ -311,4 +316,27 @@ public class PostServiceImpl implements PostService {
         Pageable pageable = PageRequest.of(0, count, Sort.by("viewCount").descending());
         return postEntityRepository.findAll(pageable).getContent();
     }
+
+    private List<PostEntity> findRecommendedPostsFromOp(Integer k, UserEntity loginUser) {
+        List<Double> userVector = userVectorService.createUserProfileEmbedding(loginUser);
+
+        OpenSearchDto.KnnViewResponse ViewResponse = postRecommendsFinder.knn(new OpenSearchDto.KnnReq(userVector, k));
+
+        List<Long> recommendedIds = ViewResponse.items().stream()
+                .map(OpenSearchDto.KnnView::doc_id)
+                .filter(Objects::nonNull)
+                .map(Long::valueOf)
+                .collect(Collectors.toList());
+
+        if (recommendedIds.isEmpty()) {
+            log.info("오픈서치에서 추천된 공고가 없습니다. k={}, vector size={}", k, userVector.size());
+            return List.of();
+        }
+
+        log.info("오픈서치 추천 결과 - User:{} 추천ID: {}", loginUser.getId(), recommendedIds);
+
+        return postEntityRepository.findAllById(recommendedIds);
+    }
+
+
 }
