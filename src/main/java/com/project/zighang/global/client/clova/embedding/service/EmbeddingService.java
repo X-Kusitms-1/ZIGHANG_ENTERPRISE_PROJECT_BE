@@ -4,7 +4,6 @@ import com.project.zighang.global.client.clova.embedding.EmbeddingGenerator;
 import com.project.zighang.global.client.clova.embedding.dto.EmbeddingDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
@@ -14,13 +13,10 @@ import java.util.UUID;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class EmbeddingService implements EmbeddingGenerator {
 
     private final RestClient ncpEmbeddingClient;
-
-    public EmbeddingService(@Qualifier("NcpEmbeddingClient") RestClient ncpEmbeddingClient) {
-        this.ncpEmbeddingClient = ncpEmbeddingClient;
-    }
 
     @Value("${cloud.ncp.embedding.endpoint}")
     private String embeddingEndpoint;
