@@ -34,6 +34,7 @@ public class PostingQueryService implements PostingFinder {
 
     @Override
     public List<PostEntity> findPostingsByStatusAndDateRange(UserEntity user, ApplyStatus status, LocalDate startDate, LocalDate endDate) {
+        // LocalDate를 LocalDateTime으로 변환 (시작일은 00:00:00, 종료일은 23:59:59)
         LocalDateTime startDateTime = startDate.atStartOfDay();
         LocalDateTime endDateTime = endDate.atTime(LocalTime.MAX);
 
