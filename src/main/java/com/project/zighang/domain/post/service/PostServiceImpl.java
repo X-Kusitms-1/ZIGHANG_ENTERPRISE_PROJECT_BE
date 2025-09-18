@@ -50,10 +50,6 @@ public class PostServiceImpl implements PostService {
     private final PostRecommendationService postRecommendationService;
 
     private static final int MAX_SIZE = 50;
-    private static final int REFRESH_ID_INCREMENT = 100;
-    private static final long MAX_RECRUITMENT_ID = 12000L;
-    private static final int ROLLBACK_DECREMENT = 200;
-    private final ReactiveUserDetailsPasswordService reactiveUserDetailsPasswordService;
 
     @Override
     @Transactional(readOnly = true)
@@ -81,6 +77,8 @@ public class PostServiceImpl implements PostService {
                     .stream()
                     .map(TodayApplyPostsResponseDto::from)
                     .toList();
+
+            log.info("추천 결과: {}", todayApplyPostsResponseDtoList);
 
             // 초기 ID 리스트 로그
             List<Long> idList = todayApplyPostsResponseDtoList.stream()
@@ -320,9 +318,9 @@ public class PostServiceImpl implements PostService {
     }
 
     private List<PostEntity> findRecommendedPostsFromOp(Integer k, UserEntity loginUser) {
-        List<Double> UserVector = userVectorService.createUserProfileEmbedding(loginUser);
+        List<Double> userVector = userVectorService.createUserProfileEmbedding(loginUser);
 
-        OpenSearchDto.KnnViewResponse ViewResponse = postRecommendsFinder.knn(new OpenSearchDto.KnnReq(UserVector, k));
+        OpenSearchDto.KnnViewResponse ViewResponse = postRecommendsFinder.knn(new OpenSearchDto.KnnReq(userVector, k));
 
         List<Long> recommendedIds = ViewResponse.items().stream()
                 .map(OpenSearchDto.KnnView::doc_id)
@@ -331,9 +329,11 @@ public class PostServiceImpl implements PostService {
                 .collect(Collectors.toList());
 
         if (recommendedIds.isEmpty()) {
-            log.info("오픈서치에서 추천된 공고가 없습니다. k={}, vector size={}", k, UserVector.size());
+            log.info("오픈서치에서 추천된 공고가 없습니다. k={}, vector size={}", k, userVector.size());
             return List.of();
         }
+
+        log.info("오픈서치 추천 결과 - User:{} 추천ID: {}", loginUser.getId(), recommendedIds);
 
         return postEntityRepository.findAllById(recommendedIds);
     }
